@@ -1,0 +1,17 @@
+rasa_semantic_schema:
+  target: analytics
+  outputs:
+    analytics:
+      type: redshift
+      host: "{{ env_var('PG_HOST') }}"
+      user: "{{ env_var('PG_USER') }}"
+      password: "{{ env_var('PG_PASSWORD') }}"
+      port: "{{ env_var('PG_PORT') | as_number }}"
+      dbname: "{{ env_var('PG_DATABASE_NAME') }}"
+      schema: "{{ var('source_schema_prefix') }}"
+      threads: 4
+      keepalives_idle: 0 # default 0, indicating the system default
+      connect_timeout: 10 # default 10 seconds
+      # search_path: public # optional, not recommended
+      #sslmode: [optional, set the sslmode used to connect to the database (in case this parameter is set, will look for ca in ~/.postgresql/root.crt)]
+      ra3: true # enables cross-database sources

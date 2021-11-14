@@ -1,0 +1,59 @@
+name: 'rasa_semantic_schema'
+version: '1.0.0'
+config-version: 2
+
+# This setting configures which "profile" dbt uses for this project.
+profile: 'rasa_semantic_schema'
+
+# These configurations specify where dbt should look for different types of files.
+# The `source-paths` config, for example, states that models in this project can be
+# found in the "models/" directory. You probably won't need to change these!
+source-paths: ["models"]
+analysis-paths: ["analysis"]
+test-paths: ["tests"]
+data-paths: ["data"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target"  # directory which will store compiled SQL files
+clean-targets:         # directories to be removed by `dbt clean`
+  - "target"
+  - "dbt_modules"
+
+vars:
+  # connection settings
+  
+  # prefix of the schema where raw event data is must be provided in the command line arguments
+  # source_schema_prefix: "{{ env_var('PG_SCHEMA_PREFIX', env_var('PG_SCHEMA_PREFIX', 'set-me-up')) }}"
+  # {{ env_var('PG_SCHEMA_PREFIX', 'set-me-up') }}
+  # "{{ env_var('DBT_MATERIALIZATION', 'view') }}"
+
+  # configure external sessions and user ids
+
+  # the session_started and user events fields used to identify users
+  # use sender_id if no additional information is passed
+  user_id: 'sender_id'
+  # external session identifier passed into session_started and user events
+  # use sender_id if no such session is passed
+  external_session_id: 'sender_id'
+
+
+  # new session gap (old SDK compat) in minutes (defaults disables check)
+  compat_old_session_gap_minutes: 5256000
+  # intents indicating that user is frustrated, angry, disappointed with the service
+  intents_frustrated:
+    - "'react_frustrated'"
+  # intents indicating that user is happy with the service
+  intents_happy:
+    - "'thankyou'"
+  # intents indicating that bot didn't perform as expected by the user
+  intents_raise_dispute:
+    - "'raise_dispute'"
+  # actions indicating that user was redirected to human agent / outside service
+  actions_agent_handoff:
+    - "'utter_redirect_to_faqs'"
+    - "'action_agent_handoff'"
+
+seeds:
+  # store seeds into _views schema
+  schema: views
