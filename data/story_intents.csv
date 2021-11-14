@@ -1,0 +1,8 @@
+intent_name
+request_limit_change
+enquire_limit_change
+enquire_transaction_failure
+request_transaction_refund
+view_bill_details
+view_transactions
+view_user_details
