@@ -1,0 +1,50 @@
+
+version: 2
+
+models:
+  # staging
+  - name: load_ids
+    description: "A list of currently loaded sender ids"
+    columns:
+      - name: load_id
+        tests:
+          - unique
+          - not_null
+  - name: events
+    columns:
+      - name: _record_hash
+        tests:
+          - unique
+          - not_null
+  - name: stg_event_sequence
+    columns:
+      - name: _record_hash
+        tests:
+          - unique
+          - not_null  
+  - name: stg_slots
+    columns:
+      - name: slot_record_hash
+        tests:
+          - unique
+          - not_null
+  - name: stg_interactions
+    columns:
+      - name: interaction_id
+        tests:
+          - unique
+          - not_null
+      - name: user_id
+          - not_null
+  - name: stg_sessions
+    columns:
+      - name: session_id
+        tests:
+          - unique
+          - not_null
+  - name: stg_conversations
+    columns:
+      - name: conversation_id
+        tests:
+          - unique
+          - not_null

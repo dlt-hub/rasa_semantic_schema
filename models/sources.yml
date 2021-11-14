@@ -1,0 +1,29 @@
+version: 2
+
+sources:
+  - name: events
+    schema: "{{ var('source_schema_prefix') }}_event"
+    tables:
+      - name: event
+        schema: "{{ var('source_schema_prefix') }}_event"
+      - name: event_user
+        schema: "{{ var('source_schema_prefix') }}_event"
+      - name: event_bot
+        schema: "{{ var('source_schema_prefix') }}_event"
+      - name: event_slot
+        schema: "{{ var('source_schema_prefix') }}_event"
+      - name: event_action
+        schema: "{{ var('source_schema_prefix') }}_event"
+      - name: event_active_loop
+        schema: "{{ var('source_schema_prefix') }}_event"
+      - name: event_session_started
+        schema: "{{ var('source_schema_prefix') }}_event"
+      - name: _loads
+        schema: "{{ var('source_schema_prefix') }}_event"
+      - name: _version
+        schema: "{{ var('source_schema_prefix') }}_event }}"
+        columns:
+          - name: version
+            tests:
+              - dbt_expectations.expect_column_to_exist
+

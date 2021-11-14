@@ -1,0 +1,47 @@
+
+version: 2
+
+models:
+  - name: event_sequence
+    columns:
+      - name: _record_hash
+        tests:
+          - unique
+          - not_null  
+  - name: actions
+    columns:
+      - name: action_record_hash
+        tests:
+          - unique
+          - not_null
+  - name: slots
+    columns:
+      - name: slot_record_hash
+        tests:
+          - unique
+          - not_null
+  - name: interactions
+    columns:
+      - name: interaction_id
+        tests:
+          - unique
+          - not_null
+  - name: sessions
+    columns:
+      - name: session_id
+        tests:
+          - unique
+          - not_null
+  - name: conversations
+    columns:
+      - name: conversation_id
+        tests:
+          - unique
+          - not_null
+  - name: users
+    columns:
+      - name: user_id
+        tests:
+          - unique
+          - not_null
+      
