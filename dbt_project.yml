@@ -20,6 +20,8 @@ clean-targets:         # directories to be removed by `dbt clean`
   - "target"
   - "dbt_modules"
 
+
+
 vars:
   # connection settings
   
@@ -27,6 +29,7 @@ vars:
   # source_schema_prefix: "{{ env_var('PG_SCHEMA_PREFIX', env_var('PG_SCHEMA_PREFIX', 'set-me-up')) }}"
   # {{ env_var('PG_SCHEMA_PREFIX', 'set-me-up') }}
   # "{{ env_var('DBT_MATERIALIZATION', 'view') }}"
+  source_schema_prefix: ''
 
   # configure external sessions and user ids
 
