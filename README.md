@@ -68,3 +68,32 @@ Full refresh will take all the existing distinct loads from the `_loads` table.
 ## Seeds
 
 ## Schemas
+
+### Semantic schema
+
+![dbdiagram semantic schema](docs/semantic_schema/dbdiagram_io.png)
+
+The semantic schema contains 2 types of tables - Event tables and stateful entity tables
+#### event tables:
+- user messages: this table contains the user messages
+- bot messages: This table contains the bot messages and actions
+- slot request &fill: This table records the request and filling of slots
+- story actions: Like the slot table for the setups that use stories instead of slots
+
+#### stateful entity tables
+
+The stateful entity tables are cumulative aggregations that calculate the state of the entity so we can use it in the context of events. For instance, we can look at a user message in the context of the conversation state and outcome (handover, conversion, etc)
+
+- Interaction
+- Session
+- Conversation
+- Custom user clients: User
+- Custom story clients: Story
+
+
+## Usage
+The semantic schema is designed for several access patterns depending on the entity studied.
+- Classic dimensional model
+
+
+
