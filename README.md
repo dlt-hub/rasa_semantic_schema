@@ -87,8 +87,8 @@ The stateful entity tables are cumulative aggregations that calculate the state 
 - Interaction
 - Session
 - Conversation
-- Custom user clients: User
-- Custom story clients: Story
+- Custom user implementation: User
+
 
 
 ## Usage
