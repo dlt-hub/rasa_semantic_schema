@@ -145,6 +145,20 @@ This access pattern is particularly helpful in answering quantitative questions 
 - How many conversations are in what state
 - How many interactions were bounces
 
+### tables:
+#### Dialogue event tables:
+-  user_messages: Contains references to the encapsulating entity (interaction, session,conversation, users), and to the previous and current (following) bot messages
+
+-  bot actions: Contains references to the encapsulating entity (interaction, session,conversation, users), and to the current (preceding) and next bot messages
+#### Scenario event tables:
+- slots: captures story events depending on your bot config. Can be used for scenario funnels or we can refer to it from other events.
+- actions: same as slots depending on bot implementation.
+#### Stateful entity tables:
+
+- interaction: An interaction is the smallest unit with state (such as parsing success), and represents a dialogue exchange along with all technical events that happen during.
+- sessions: A higher aggregation of interactions, delimited by a time without actions (configuralble) or a custom event such as "session start"
+- conversations: Like sessions but using the rasa sender id
+- users: Custom: Like conversations but using a custom user id sent by you
 
 ####glossary:
 * Facts - Things that happen such as events or sales, we can sum or count them. (example: sales_value, message_id)
