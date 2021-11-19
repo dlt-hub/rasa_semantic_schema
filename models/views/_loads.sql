@@ -10,6 +10,7 @@
 -- depends_on: {{ ref('bot_actions') }}
 -- depends_on: {{ ref('slots') }}
 -- depends_on: {{ ref('users') }}
+-- depends_on: {{ ref('user_messages') }}
 select load_id, 1 as status, getdate() as inserted_at from {{ ref('load_ids') }}
     WHERE load_id NOT IN (
         SELECT load_id FROM {{ source('events', '_loads') }} WHERE status = 1)
