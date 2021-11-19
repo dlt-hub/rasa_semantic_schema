@@ -28,4 +28,3 @@ JOIN {{ source('events', 'event_user') }} AS u
     on u._record_hash = e._record_hash and e.sender_id = u.sender_id -- use dist key
 ORDER BY "timestamp"
 
- 
