@@ -24,7 +24,7 @@ e.interaction_id as bot_interaction_sk,
 e.interaction_id as user_interaction_fk,
 e.interaction_id as action_interaction_fk,
 e.sender_id || '/', e.session_nr || '/' || (e.interaction_nr -1) as previous_bot_interaction_fk
+from {{ ref('stg_event_sequence') }} as f
 JOIN {{ source('events', 'event_user') }} AS u
     on u._record_hash = e._record_hash and e.sender_id = u.sender_id -- use dist key
 ORDER BY "timestamp"
-
