@@ -4,6 +4,10 @@
  
  The funnel order may be sorted by step nr or by the metric (as a funnel is always sorted descending by metric)
 
+By following these simple rules, you are able to generate slot, story, or conversation depth (interaction) funnels
+
+For non - linear journeys it is suggested to use a sankey instead of a funnel
+
 ### examples:
 
 ### Slot actions funnel - All slot events, requests and fills 
