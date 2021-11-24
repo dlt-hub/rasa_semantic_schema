@@ -20,6 +20,11 @@ pg_pass = 'input here' #get from your secret manager / credential store such as 
 schema_prefix = ''
 # --full-refresh
 
+
+"""if you do not have dbt installed, then add dbt to your package requirements and the command "dbt deps" to your 
+airflow instance installation.
+Depending on how you prepare your airflow environment, you could add the install and the deps command to the dag"""
+
 cmd = f"""env $(cat .env | grep "^[^#;]" | xargs) PG_PASSWORD={pg_pass} dbt run  --profiles-dir . --vars "{{source_schema_prefix: {schema_prefix}}" --fail-fast
 """
 
