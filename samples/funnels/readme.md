@@ -18,7 +18,7 @@ ORDER BY "COUNT_DISTINCT(conversation_id)" DESC
 LIMIT 10;
 ```
 Image from superset: 
-![image interaction funnel](samples/funnels/slot_funnel.png)
+![image interaction funnel](slot_funnel.png)
 
 
 
@@ -34,7 +34,7 @@ LIMIT 10;
 
 ```
 Image from superset: 
-![image interaction funnel](samples/funnels/interaction_funnel.png)
+![image interaction funnel](interaction_funnel.png)
 
 
 
