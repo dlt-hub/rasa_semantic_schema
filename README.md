@@ -64,7 +64,10 @@ On the successful processing new records are inserted with status = 1.
 
 ### Full Refresh
 Full refresh will take all the existing distinct loads from the `_loads` table.
-
+[dbt docs](https://docs.getdbt.com/docs/building-a-dbt-project/building-models/configuring-incremental-models#what-if-the-columns-of-my-incremental-model-change)
+```
+env $(cat .env | grep "^[^#;]" | xargs) PG_PASSWORD=... dbt run --full-refresh --profiles-dir . --vars "{source_schema_prefix: jm_eks}" --fail-fast
+```
 ## Seeds
 
 ## Schemas
