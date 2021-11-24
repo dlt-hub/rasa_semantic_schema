@@ -1,12 +1,13 @@
 ## Funnels consist of
- - a metric (count of entity),
- - a dimension (funnel step)
+ - a metric (count of entity scuh as users or conversations),
+ - a dimension: Funnel step - here we use something lke the event name/type or the interaction nr
  
  The funnel order may be sorted by step nr or by the metric (as a funnel is always sorted descending by metric)
 
 ### examples:
 
-### Slot actions funnel - All slot events, requests and fills
+### Slot actions funnel - All slot events, requests and fills 
+(optionally could filter by event type)
 ```
 SELECT slot_action_normalised AS slot_action_normalised,
        slot_name_normalised AS slot_name_normalised,
