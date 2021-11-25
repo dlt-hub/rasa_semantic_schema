@@ -5,6 +5,7 @@
 Table event_user as ue {
   row_hash pk
   session_id fk
+    user_id fk
   conversation_id fk
   interaction_id fk //link to interaction
   interaction_id_sk sk //link from event/interaction
@@ -18,6 +19,7 @@ Table event_user as ue {
 Table event_bot as be{
   row_hash pk
   session_id fk
+    user_id fk
   conversation_id fk
   interaction_id fk //link to interaction
   interaction_id_sk sk //link from event/interaction
@@ -31,6 +33,7 @@ Table event_bot as be{
 Table event_story_action as sa{
   row_hash pk
   session_id fk
+    user_id fk
   conversation_id fk
   interaction_id fk //link to interaction
   interaction_id_sk sk //link from event/interaction
@@ -44,6 +47,7 @@ Table event_story_action as sa{
 Table event_slot as sl{
   row_hash pk
   session_id fk
+    user_id fk
   conversation_id fk
   interaction_id fk //link to interaction
   interaction_id_sk sk //link from event/interaction
@@ -57,6 +61,7 @@ Table event_slot as sl{
 
 Table interaction as i {
   row_hash pk
+    user_id fk
   conversation_id fk
   interaction_id fk
   session_id fk
@@ -66,6 +71,7 @@ Table interaction as i {
 
 Table session as s{
   row_hash pk
+    user_id fk
   session_id fk
   conversation_id fk
   action char
@@ -73,6 +79,13 @@ Table session as s{
  }
 
 Table conversation as c{
+  user_id fk
+  conversation_id pk
+  timestamp timestamp
+ }
+
+Table user as u{
+  user_id pk
   conversation_id fk
   timestamp timestamp
  }
@@ -98,15 +111,19 @@ Ref: be.interaction_action_fk > sa.interaction_id_sk
 Ref: ue.interaction_id > i.interaction_id
 Ref: ue.conversation_id > c.conversation_id
 Ref: ue.session_id > s.session_id
+Ref: ue.user_id > u.user_id
 
 Ref: be.interaction_id > i.interaction_id
 Ref: be.conversation_id > c.conversation_id
-Ref: be.session_id > s.session_id
+Ref: be.session_id > u.session_id
+Ref: be.user_id > u.user_id
 
 Ref: sa.interaction_id > i.interaction_id
 Ref: sa.conversation_id > c.conversation_id
 Ref: sa.session_id > s.session_id
+Ref: sa.user_id > u.user_id
 
 Ref: sl.interaction_id > i.interaction_id
 Ref: sl.conversation_id > c.conversation_id
 Ref: sl.session_id > s.session_id
+Ref: sl.user_id > u.user_id
