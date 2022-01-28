@@ -5,11 +5,11 @@ In order to run the package, you must supply environemnt variables defining acce
 The prefix of the schemas from which packages takes and writes data must be supplied from command line.
 Following example
 ```
-env $(cat .env | grep "^[^#;]" | xargs) PG_PASSWORD=... dbt run --profiles-dir . --vars "{source_schema_prefix: carbon_bot_eks}" --fail-fast
+env $(cat .env | grep "^[^#;]" | xargs) PG_PASSWORD=... dbt run --profiles-dir . --vars "{source_schema_prefix: carbon_bot_eks, compat_old_session_gap_minutes: 60}" --fail-fast
 ```
 1. applies environment variables from `.env` file
 2. overwrites password value
-3. runs the package incrementally for the `carbon_bot_eks` schema prefix
+3. runs the package incrementally for the `carbon_bot_eks` schema prefix, it also breaks sessions every 60 minutes (as carbon bot contains a lot of old data)
 
 Alternatively you can apply the variables from the .env file to the shell and use `dbt run`.
 

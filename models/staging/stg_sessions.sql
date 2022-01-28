@@ -20,7 +20,7 @@ WITH sessions_window_functions AS
     DATEDIFF('second', min(i.interaction_initiation_timestamp)::timestamp, max(i.interaction_end_timestamp)::timestamp) as session_duration_seconds,
     max(i.interaction_nr) as interactions_count,
     count(DISTINCT i.interaction_active_form) as distinct_forms_activated,
-    -- one session has one user and one external session id
+    -- one session has one user and one external session id, may be NULL no interaction in session had those values assigned
     max(i.user_id) as user_id,
     max(i.external_session_id) as external_session_id,
     -- bot quality metrics
