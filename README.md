@@ -1,4 +1,24 @@
-# Chat Analytics Semantic Schema
+# Rasa Semantic Schema
+This DBT package runs on top of data sets created by Rasa Ingestion Pipeline. This pipeline continously loads the tracker store data into two **raw schemas** that represent documents in tracker store in relational form.
+
+| schema                | description                                  |
+| --------------------- | -------------------------------------------- |
+| {schema_prefix}_event | Schema with raw tracker events               |
+| {schema_prefix}_model | Schema with stories, rules and model domains |
+|                       |                                              |
+
+[See here for **raw schema** details](README_RAW_SCHEMA.md)
+
+
+DBT package will create two more **semantic schemas**
+
+| schema                  | description                                               |
+| ----------------------- | --------------------------------------------------------- |
+| {schema_prefix}_staging | Various intermediate tables that optimize schema building |
+| {schema_prefix}_views   | Final semantic schema tables used for reporting           |
+|                         |                                                           |
+
+[See here for **semantic schema** details](README_SCHEMA.md)
 
 ## Running DBT Package
 In order to run the package, you must supply environemnt variables defining access to Redshift. The documentation is provided [here](https://github.com/scale-vector/rasa_data_ingestion_deployment/blob/master/autopoiesis/DEPLOYMENT.md#redshift-access). You can also use the [.env](.env) file as an example.
