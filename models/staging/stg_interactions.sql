@@ -19,9 +19,8 @@ SELECT
   max(e.timestamp) as interaction_end_timestamp,
   max(active_form) as interaction_active_form,
   max(e.model_id) as interaction_model_id,
-  -- assign user id, fallback to conversation id when user unknown
   -- user id comes in session_started or user events metadata. one of those events must be present in each
-  -- interaction
+  -- interaction, otherwise user id in interaction is unknown
   COALESCE(
     max(COALESCE(u.{{ var('user_id') }}, ss.{{ var('user_id') }})),
     conversation_id

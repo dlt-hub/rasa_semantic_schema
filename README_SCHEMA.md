@@ -123,7 +123,7 @@ Specifically, you can this way look at interaction in the "success context/state
 - conversations: Like sessions but using the rasa sender id
 - users: Custom: Like conversations but using a custom user id sent by you
 
-####glossary:
+#### glossary:
 * Facts - Things that happen such as events or sales, we can sum or count them. (example: sales_value, message_id)
 * Metrics - Sum, count, or a custom aggregation of facts. Example: "total sales" as sum of sales_value, "messages" as count of message_id)
 * Dimensions - Descriptive attributes of a fact that can be used to break down dimensions by (source, time, context, bot version, etc) Example : Source, as in count of messages by *source*

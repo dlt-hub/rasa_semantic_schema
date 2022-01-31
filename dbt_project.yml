@@ -23,13 +23,6 @@ clean-targets:         # directories to be removed by `dbt clean`
 
 
 vars:
-  # connection settings
-  
-  # prefix of the schema where raw event data is must be provided in the command line arguments
-  # source_schema_prefix: "{{ env_var('PG_SCHEMA_PREFIX', env_var('PG_SCHEMA_PREFIX', 'set-me-up')) }}"
-  # {{ env_var('PG_SCHEMA_PREFIX', 'set-me-up') }}
-  # "{{ env_var('DBT_MATERIALIZATION', 'view') }}"
-  source_schema_prefix: ''
 
   # configure external sessions and user ids
 
@@ -58,5 +51,5 @@ vars:
     - "'action_agent_handoff'"
 
 seeds:
-  # store seeds into _views schema
+  # where to store seeds with scenario intents, funnel steps etc.
   schema: views
