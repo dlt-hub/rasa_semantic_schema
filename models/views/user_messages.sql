@@ -20,8 +20,10 @@ u.parse_data__intent__confidence as intent_confidence,
 u.input_channel,
 e.session_nr,
 e.interaction_nr,
-e.interaction_id as bot_interaction_sk,
-e.interaction_id as user_interaction_fk,
+e.interaction_id as interaction_id,
+e.interaction_id as user_interaction_sk,
+e.interaction_id as bot_interaction_fk,
+e.interaction_id as slot_interaction_fk,
 e.interaction_id as action_interaction_fk,
 e.sender_id || '/' || e.session_nr || '/' || (e.interaction_nr -1) as previous_bot_interaction_fk
 from {{ ref('stg_event_sequence') }} as e
