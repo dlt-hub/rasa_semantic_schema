@@ -51,6 +51,11 @@ will return non 0 exit code if fails
 4. run the package incrementally
 5. optionally run tests
 
+### Specify alternative destination schema prefix.
+By default destination ('staging` and `views`) schemas will use the same schema prefix as source schema (`event`). Alternative destination schema prefix can be specified with `dest_schema_prefix` variable. This allows to have several semantic schemas created from single raw schema for example to test different settings or run automated tests.
+```
+env $(cat .env | grep "^[^#;]" | xargs) PG_PASSWORD=... dbt run --profiles-dir . --vars "{source_schema_prefix: carbon_bot_eks, dest_schema_prefix: carbon_bot_eks_v2}" --fail-fast
+```
 ## Package customizations
 Package can be customized as follows:
 
