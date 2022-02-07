@@ -9,8 +9,8 @@
 }}
 
 -- depends_on: {{ ref('stg_conversations') }}
-SELECT DISTINCT
-    FIRST_VALUE(s.user_id) OVER (PARTITION BY s.user_id) as user_id, -- primary key
+SELECT
+    s.user_id, -- primary key
     min(s.session_start_timestamp) OVER (PARTITION BY s.user_id) as first_seen_timestamp,
     max(s.session_end_timestamp) OVER (PARTITION BY s.user_id) as last_seen_timestamp,
     count(s.session_id) OVER (PARTITION BY s.user_id) as sessions_count,

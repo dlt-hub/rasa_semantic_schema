@@ -14,6 +14,7 @@ SELECT
     e.model_id,
     -- we could customize text extraction if bot uses formatters, that may require joing with child tables
     b.text,
+    senders.user_id,
     --
     e.timestamp,
     e.sender_id as conversation_id,
@@ -27,6 +28,8 @@ SELECT
     e.interaction_id as action_interaction_fk,
     e.sender_id || '/', e.session_nr || '/' || e.interaction_nr+1 as next_user_interaction_fk
 FROM {{ ref('stg_event_sequence') }} as e
-JOIN {{ source('events', 'event_bot') }} AS b
+INNER JOIN {{ source('events', 'event_bot') }} AS b
     on b._record_hash = e._record_hash and e.sender_id = b.sender_id -- use dist key
+LEFT JOIN {{ ref('sender_ids') }} AS senders
+    ON senders.sender_id = e.sender_id
 ORDER BY "timestamp"
