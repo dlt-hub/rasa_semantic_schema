@@ -4,11 +4,21 @@ version: 2
 models:
   # staging
   - name: load_ids
-    description: "A list of currently loaded sender ids"
+    description: "A list of currently loaded load ids"
     columns:
       - name: load_id
         tests:
           - unique
+          - not_null
+  - name: sender_ids
+    description: "A list of currently loaded sender ids with mapped external user ids"
+    columns:
+      - name: sender_id
+        tests:
+          - unique
+          - not_null
+      - name: user_id
+        tests:
           - not_null
   - name: events
     columns:
