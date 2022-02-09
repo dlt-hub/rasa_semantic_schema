@@ -9,11 +9,11 @@
 }}
 
 -- depends_on: {{ ref('stg_conversations') }}
-SELECT
+SELECT distinct
     s.user_id, -- primary key
-    min(s.session_start_timestamp) OVER (PARTITION BY s.user_id) as first_seen_timestamp,
-    max(s.session_end_timestamp) OVER (PARTITION BY s.user_id) as last_seen_timestamp,
-    count(s.session_id) OVER (PARTITION BY s.user_id) as sessions_count,
+    min(s.session_start_timestamp) OVER (PARTITION BY s.user_id rows between unbounded preceding and unbounded following) as first_seen_timestamp,
+    max(s.session_end_timestamp) OVER (PARTITION BY s.user_id rows between unbounded preceding and unbounded following) as last_seen_timestamp,
+    count(s.session_id) OVER (PARTITION BY s.user_id rows between unbounded preceding and unbounded following) as sessions_count,
     -- count(DISTINCT s.conversation_id) OVER (PARTITION BY s.user_id) as conversations_count,
     FIRST_VALUE(s.session_id) OVER (PARTITION BY s.user_id ORDER BY session_initiation_timestamp ASC 
         rows between unbounded preceding and unbounded following) as first_session_id,
