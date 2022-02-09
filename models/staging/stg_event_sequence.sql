@@ -32,7 +32,7 @@ sessionify as
           then 1 else 0 end
         )
         over (partition by sender_id order by "timestamp" rows between unbounded preceding and current row),
-      1::bigint) as session_nr
+      1::bigint) as sender_session_nr
     from prev_actions
   ),
 turnify as
@@ -40,23 +40,27 @@ turnify as
     *,
     sum(case when event = 'user' then 1 else 0 end)
       over (
-        partition by sender_id, session_nr order by "timestamp" rows between unbounded preceding and current row
+        partition by sender_id, sender_session_nr order by "timestamp" rows between unbounded preceding and current row
       ) as interaction_nr,
     -- previous actor in the same session
     lag(event) over (partition by sender_id order by "timestamp") as previous_actor,
     -- active form in session
     NULLIF(last_value(case when event ='active_loop' then coalesce(value, '---unset') else null end ignore nulls)
-      over (partition by sender_id, session_nr order by "timestamp" rows between unbounded preceding and current row),
+      over (partition by sender_id, sender_session_nr order by "timestamp" rows between unbounded preceding and current row),
       '---unset') as active_form,
     -- active form numer in session
     sum(
         case when event = 'active_loop' and value IS NOT NULL then 1 else 0 END
-    ) OVER (PARTITION BY sender_id, session_nr ORDER BY timestamp rows between unbounded preceding and current row) as active_form_nr
+    ) OVER (PARTITION BY sender_id, sender_session_nr ORDER BY timestamp rows between unbounded preceding and current row) as active_form_nr,
     --  todo: slot fill step - could tag the slot fill that is in progress
+    -- first sender session time - used for sorting sessions within the user entity
+     min("timestamp" ) over ( partition by sender_id, sender_session_nr) as sender_session_start
     from sessionify
   )
 select *,
- max(interaction_nr) over (partition by sender_id) - interaction_nr as reverse_interaction_nr,
+ max(interaction_nr) over (partition by sender_id, sender_session_nr) - interaction_nr as reverse_interaction_nr,
+ --user session nr - we take the sender sessions and rank them by start time
+ dense_rank() over (partition by user_id order by sender_session_start, sender_session_nr) as session_nr,
  (sender_id ||  '/' ||  session_nr ||  '/'||  interaction_nr) as interaction_id,
  (sender_id ||  '/' ||  session_nr ) as session_id
 from turnify

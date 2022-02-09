@@ -7,7 +7,9 @@
     )
 }}
 
-SELECT events.* FROM
+SELECT events.*,
+       senders.user_id
+   FROM
     (SELECT sender_id, _record_hash, event, "timestamp", parse_data__intent__name as value, model_id, _load_id
         FROM {{ source('events', 'event_user') }} as u
     union all
@@ -27,4 +29,4 @@ SELECT events.* FROM
       SELECT  sender_id, _record_hash, event, "timestamp", NULL as value, model_id, _load_id
       FROM {{ source('events', 'event_session_started') }} as ss
     ) AS events
-JOIN {{ ref('sender_ids') }} AS senders ON senders.sender_id = events.sender_id
+INNER JOIN {{ ref('sender_ids') }} AS senders ON senders.sender_id = events.sender_id

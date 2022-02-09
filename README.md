@@ -40,11 +40,11 @@ dbt deps --profiles-dir .
 ```
 2. update seeds
 ```
-dbt seed --profiles-dir . --vars "{source_schema_prefix: jm_eks}"
+dbt seed --profiles-dir . --vars "{source_schema_prefix: findemo_eks}"
 ```
 3. test if raw schema (`event`) was created (or have the package fail on non existing tables)
 ```
-dbt test --profiles-dir . --vars "{source_schema_prefix: jm_eks}" -s source:*
+dbt test --profiles-dir . --vars "{source_schema_prefix: findemo_eks}" -s source:*
 ```
 will return non 0 exit code if fails
 
@@ -67,20 +67,23 @@ In the same way, additional session identifier can be passed. Such session ident
 The columns names for user and external session ids may be configured in `dbt_project` or by passing the variables in command line
 
 ```
-dbt run --profiles-dir . --vars "{source_schema_prefix: jm_eks, user_id: metadata__use
+dbt run --profiles-dir . --vars "{source_schema_prefix: findemo_eks, user_id: metadata__use
 r_id, external_session_id: metadata__mitter_id}" --fail-fast
 ```
 
-### Configuring special intents and actions
-Package can provide information on 
+### Configuring metrics on actions and intents count
+Package allows to define actions and intents that are counted in interaction and session level and may be used as a metrics. Example
 
-1. intents that start a story
-2. intents that indicate that user is frustrated or angry
-3. actions that indicate handoff to agent (and can be used to measure containment rate)
-4. intents that indicate that user disputes the resolution of the scenario
-5. intents that indicate that user is happy with the service
+1. intents and actions that indicate low confidence or fallbacks
+2. intents that indicate that user is frustrated or angry ( and can measure frustration rate )
+3. actions that indicate handoff to agent (and can be used to measure containment/handover rate)
+4. intents that indicate that user disputes the actions of the bot
+5. intents that indicate that user satisfaction with the service
 
 All of those can be set up via seeds or `dbt_project` variables.
+
+### First story intents
+Package facilitates surfacing intents that open particular scenario or story. The list of such intents is configured in seeds and available in interaction and session level.
 
 ## Loads lifecycle and `_loads` table
 Package identifies new data by finding all load identifiers in `_loads` table in `event` schema that have only one entry with status 0.
@@ -91,7 +94,7 @@ On the successful processing new records are inserted with status = 1.
 Full refresh will take all the existing distinct loads from the `_loads` table.
 [dbt docs](https://docs.getdbt.com/docs/building-a-dbt-project/building-models/configuring-incremental-models#what-if-the-columns-of-my-incremental-model-change)
 ```
-env $(cat .env | grep "^[^#;]" | xargs) PG_PASSWORD=... dbt run --full-refresh --profiles-dir . --vars "{source_schema_prefix: jm_eks}" --fail-fast
+env $(cat .env | grep "^[^#;]" | xargs) PG_PASSWORD=... dbt run --full-refresh --profiles-dir . --vars "{source_schema_prefix: findemo_eks}" --fail-fast
 ```
 ## Seeds
 Currently you can define intents that start particular story in the seeds
