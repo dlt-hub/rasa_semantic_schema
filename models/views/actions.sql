@@ -4,7 +4,7 @@
         schema='views',
         unique_key='action_record_hash',
         on_schema_change='fail',
-        dist='conversation_id',
+        dist='sender_id',
         sort=['timestamp']
     )
 }}
@@ -17,7 +17,7 @@ SELECT
     e.model_id,
     e.timestamp,
     e.value as action_name,
-    e.sender_id as conversation_id,
+    e.sender_id,
     e.session_nr,
     e.interaction_nr,
     e.interaction_id,

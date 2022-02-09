@@ -4,14 +4,14 @@
         schema='views',
         unique_key='user_message_record_hash',
         on_schema_change='fail',
-        dist='conversation_id',
+        dist='sender_id',
         sort=['timestamp']
     )
 }}
 
 SELECT
 senders.user_id,
-u.sender_id as conversation_id,
+u.sender_id,
 u._record_hash as user_message_record_hash,
 u.message_id,
 u.timestamp,

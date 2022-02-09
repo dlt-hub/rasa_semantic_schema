@@ -4,14 +4,14 @@
         schema='views',
         unique_key='slot_record_hash',
         on_schema_change='fail',
-        dist='conversation_id',
+        dist='sender_id',
         sort=['timestamp']
     )
 }}
 
 SELECT
     s.slot_record_hash, -- primary key
-    s.sender_id as conversation_id,
+    s.sender_id,
     s.name,
     s.value,
     s.slot_name_normalised,

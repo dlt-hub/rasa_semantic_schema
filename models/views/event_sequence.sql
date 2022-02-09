@@ -8,5 +8,5 @@
     )
 }}
 
--- depends_on: {{ ref('stg_conversations') }}
+-- depends_on: {{ ref('stg_senders') }}
 SELECT * FROM {{ ref('stg_event_sequence') }}

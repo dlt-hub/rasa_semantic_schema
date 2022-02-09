@@ -52,9 +52,9 @@ models:
         tests:
           - unique
           - not_null
-  - name: stg_conversations
+  - name: stg_senders
     columns:
-      - name: conversation_id
+      - name: sender_id
         tests:
           - unique
           - not_null

@@ -4,7 +4,7 @@
         schema='views',
         unique_key='bot_record_hash',
         on_schema_change='fail',
-        dist='conversation_id',
+        dist='sender_id',
         sort=['timestamp']
     )
 }}
@@ -17,7 +17,7 @@ SELECT
     senders.user_id,
     --
     e.timestamp,
-    e.sender_id as conversation_id,
+    e.sender_id as sender_id,
     e.value as utter_action,
     e.session_nr,
     e.interaction_nr,

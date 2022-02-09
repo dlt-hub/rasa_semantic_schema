@@ -32,9 +32,9 @@ models:
         tests:
           - unique
           - not_null
-  - name: conversations
+  - name: senders
     columns:
-      - name: conversation_id
+      - name: sender_id
         tests:
           - unique
           - not_null

@@ -2,7 +2,7 @@
     config(
         materialized='table',
         schema='staging',
-        dist='conversation_id'
+        dist='sender_id'
     )
 }}
 -- Interleaved sort key data structure
@@ -27,7 +27,7 @@ window_functions as (
 (
   SELECT
     i.session_id, -- primary key
-    i.conversation_id,
+    i.sender_id,
     i.session_nr,
     max(i.first_bot_model) as first_bot_model,
     max(i.first_story_intent) as first_story_intent,
@@ -56,7 +56,7 @@ window_functions as (
     sum(i.react_frustrated_count) as react_frustrated_count,
     sum(i.react_happy_count) as react_happy_count
   FROM window_functions AS i
-  GROUP BY i.session_id, i.conversation_id, i.session_nr
+  GROUP BY i.session_id, i.sender_id, i.session_nr
   )
 SELECT
   s.*,

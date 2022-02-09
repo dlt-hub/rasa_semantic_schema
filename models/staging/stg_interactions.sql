@@ -2,7 +2,7 @@
     config(
         materialized='table',
         schema='staging',
-        dist='conversation_id'
+        dist='sender_id'
     )
 }}
 
@@ -11,7 +11,7 @@ SELECT
   -- 
   e.interaction_nr,
   e.reverse_interaction_nr,
-  e.sender_id AS conversation_id,
+  e.sender_id,
   e.session_id,
   e.session_nr,
   e.user_id,
