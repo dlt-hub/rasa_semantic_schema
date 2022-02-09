@@ -54,7 +54,7 @@ turnify as
     ) OVER (PARTITION BY sender_id, sender_session_nr ORDER BY timestamp rows between unbounded preceding and current row) as active_form_nr,
     --  todo: slot fill step - could tag the slot fill that is in progress
     -- first sender session time - used for sorting sessions within the user entity
-     min("timestamp" ) over ( partition by sender_id, sender_session_nr rows between unbounded preceding and current row) as sender_session_start
+     min("timestamp" ) over ( partition by sender_id, sender_session_nr) as sender_session_start
     from sessionify
   )
 select *,
