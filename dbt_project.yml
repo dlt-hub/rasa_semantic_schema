@@ -37,19 +37,39 @@ vars:
 
   # new session gap (old SDK compat) in minutes (defaults disables check)
   compat_old_session_gap_minutes: 5256000
-  # intents indicating that user is frustrated, angry, disappointed with the service
-  intents_frustrated:
-    - "'react_frustrated'"
-  # intents indicating that user is happy with the service
-  intents_happy:
-    - "'thankyou'"
-  # intents indicating that bot didn't perform as expected by the user
-  intents_raise_dispute:
-    - "'raise_dispute'"
-  # actions indicating that user was redirected to human agent / outside service
-  actions_agent_handoff:
-    - "'utter_redirect_to_faqs'"
-    - "'action_agent_handoff'"
+
+  # in dictionary below you can configure metrics based on count of occurences intents or actions
+  # in conversations or sections
+
+  count_metrics:
+    # below are standard model performance metrics that could be useful regardless of particular bot business logic
+    - intent_out_of_scope:
+      # user wants something that bot understands but cannot do
+      - out_of_scope
+    - intent_nlu_fallback:
+      # (bot does not understand what user wants. that's low confidence situation
+      - nlu_fallack
+    - action_default_fallback:
+      # bot got into situation that does not know what to do next. so there's a problem in the story
+      - action_default_fallback
+    - action_unlikely_intent:
+      #  flag a particular intent at particular step in conversation as unexpected
+      - action_unlikely_intent
+
+    # below are additional metrics ie. to count handoffs
+    - intents_frustrated:
+      # intents indicating that user is frustrated, angry, disappointed with the service
+      - react_frustrated
+    - intents_happy:
+      # intents indicating that user is happy with the service
+      - thankyou
+    - intents_raise_dispute:
+      # intents indicating that bot didn't perform as expected by the user and bot's action is disputed
+      - raise_dispute
+    - actions_agent_handoff:
+      # actions indicating that user was redirected to human agent / outside service
+      - utter_redirect_to_faqs
+      - action_agent_handoff
 
 seeds:
   # where to store seeds with scenario intents, funnel steps etc.

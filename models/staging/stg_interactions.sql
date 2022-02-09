@@ -24,17 +24,9 @@ SELECT
   -- interaction, otherwise user id in interaction is unknown
   -- external session id is passed in the same way as user id
   max(COALESCE(u.{{ var('external_session_id') }}, ss.{{ var('external_session_id') }})) as external_session_id,
-  -- bot quality metrics
-  sum(case when e.event = 'user' and value = 'out_of_scope' then 1 else 0 end) as out_of_scope_count,
-  sum(case when e.event = 'user' and value = 'nlu_fallack' then 1 else 0 end) as nlu_fallbak_count,
-  sum(case when e.event = 'action' and value = 'action_default_fallback' then 1 else 0 end) as default_fallback_count,
-  sum(case when e.event = 'action' and value = 'action_unlikely_intent' then 1 else 0 end) as unlikely_intent_count,
-  -- JM specific interactions
   max(si.intent_name) as story_intent,
-  sum(case when e.event = 'action' and value IN ({{ var('actions_agent_handoff')|join(', ')}}) then 1 else 0 end) as agent_handoff_count,
-  sum(case when e.event = 'user' and value IN ({{ var('intents_raise_dispute')|join(', ')}}) then 1 else 0 end) as raise_dispute_count,
-  sum(case when e.event = 'user' and value IN ({{ var('intents_frustrated')|join(', ')}}) then 1 else 0 end) as react_frustrated_count,
-  sum(case when e.event = 'user' and value IN ({{ var('intents_happy')|join(', ')}}) then 1 else 0 end) as react_happy_count,
+  -- bot quality metrics
+  {{ generate_interactions_count_metrics('e') }}
   -- keys used for dimension join
   interaction_id AS interaction_slot_fk ,
   interaction_id AS interaction_user_fk,

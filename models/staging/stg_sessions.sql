@@ -41,29 +41,17 @@ window_functions as (
     max(i.user_id) as user_id,
     max(i.external_session_id) as external_session_id,
     -- bot quality metrics
-    sum(i.out_of_scope_count) as out_of_scope_count,
-    sum(i.nlu_fallbak_count) as nlu_fallbak_count,
-    sum(i.default_fallback_count) as default_fallback_count,
-    sum(i.unlikely_intent_count) as unlikely_intent_count,
-    -- JM specific interactions
-    -- first_value(i.story_intent)
-    --   OVER(
-    --     PARTITION BY i.session_id ORDER BY i.interaction_initiation_timestamp
-    --     rows between unbounded preceding and unbounded following) as first_story_intent,
-    count(DISTINCT i.story_intent) as distinct_story_intent_count,
-    sum(i.agent_handoff_count) as agent_handoff_count,
-    sum(i.raise_dispute_count) as raise_dispute_count,
-    sum(i.react_frustrated_count) as react_frustrated_count,
-    sum(i.react_happy_count) as react_happy_count
+    {{ generate_sessions_count_metrics('i') }}
+    count(DISTINCT i.story_intent) as distinct_story_intent_count
   FROM window_functions AS i
   GROUP BY i.session_id, i.sender_id, i.session_nr
   )
 SELECT
   s.*,
-  -- JM specific interactions
+  -- business specific interactions
   case when interactions_count = 0 then true else false end as is_bounced,
   case when interactions_count = 0 then session_id end as bounced_session_id,
   -- this could be easy done with the users table
-  case when session_nr = 0 then 'new' else 'returning' end as new_returning_session,
-  case when agent_handoff_count > 0 then session_id else null end as handover_session_id
+  case when session_nr = 0 then 'new' else 'returning' end as new_returning_session
+  -- case when actions_agent_handoff_count > 0 then session_id else null end as handover_session_id
 FROM agg_to_session AS s
