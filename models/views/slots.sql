@@ -33,4 +33,4 @@ LEFT JOIN {{ ref('stg_event_sequence') }} as f
     on s.next_slot_fill_record_hash = f._record_hash and f.sender_id = s.sender_id -- use dist key
 LEFT JOIN {{ ref('stg_event_sequence') }} as a
     on s.next_slot_fill_attempt_record_hash = a._record_hash and a.sender_id = s.sender_id -- use dist key
-ORDER BY "timestamp"
+ORDER BY {{ adapter.quote('timestamp') }}

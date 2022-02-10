@@ -14,7 +14,7 @@ with slots as (
         e.session_nr,
         e.interaction_id,
         e.interaction_nr,
-        e."timestamp",
+        e.timestamp,
         e.active_form,
         e.active_form_nr,
         s.name,
