@@ -21,7 +21,9 @@ DBT package will create two more **semantic schemas**
 [See here for **semantic schema** details](README_SCHEMA.md)
 
 ## Running DBT Package
-In order to run the package, you must supply environemnt variables defining access to Redshift. The documentation is provided [here](https://github.com/scale-vector/rasa_data_ingestion_deployment/blob/master/autopoiesis/DEPLOYMENT.md#redshift-access). You can also use the [.env](.env) file as an example.
+In order to run the package, you must supply environemnt variables defining access to Redshift. 
+For bigquery, you will need to add the json credential path to the profiles.yml and rename the profile so it becomes used.
+The documentation is provided [here](https://github.com/scale-vector/rasa_data_ingestion_deployment/blob/master/autopoiesis/DEPLOYMENT.md#redshift-access). You can also use the [.env](.env) file as an example.
 The prefix of the schemas from which packages takes and writes data must be supplied from command line.
 Following example
 ```

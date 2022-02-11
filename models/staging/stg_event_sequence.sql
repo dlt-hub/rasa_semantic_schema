@@ -3,7 +3,8 @@
         materialized='table',
         schema="staging",
         dist='sender_id',
-        sort=['timestamp']
+        sort=['timestamp'],
+        cluster_by='sender_id'
     )
 }}
 
@@ -61,7 +62,7 @@ select *,
  max(interaction_nr) over (partition by sender_id, sender_session_nr) - interaction_nr as reverse_interaction_nr,
  --user session nr - we take the sender sessions and rank them by start time
  dense_rank() over (partition by user_id order by sender_session_start, sender_session_nr) as session_nr,
- {{ dbt_utils.concat(['user_id', "'/'" , 'sender_id',  "'/'"  ,'session_nr',  "'/'"  ,'interaction_nr']) }} as interaction_id
- {{ dbt_utils.concat(['user_id', "'/'" , 'sender_id',  "'/'"  ,'session_nr']) }} as session_id
+ {{ dbt_utils.concat(['user_id', "'/'" , 'sender_id',  "'/'"  ,'sender_session_nr',  "'/'"  ,'interaction_nr']) }} as interaction_id,
+ {{ dbt_utils.concat(['user_id', "'/'" , 'sender_id',  "'/'"  ,'sender_session_nr']) }} as session_id
 from turnify
-order by {{ adapter.quote('timestamp') }} asc
+--order by {{ adapter.quote('timestamp') }} asc

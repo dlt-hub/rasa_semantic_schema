@@ -2,7 +2,8 @@
     config(
         materialized='table',
         schema='staging',
-        dist='sender_id'
+        dist='sender_id',
+        cluster_by='sender_id'
     )
 }}
 -- Interleaved sort key data structure

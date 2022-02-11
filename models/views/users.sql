@@ -4,7 +4,13 @@
         schema='views',
         unique_key='user_id',
         dist='user_id',
-        on_schema_change='fail'
+        on_schema_change='fail',
+        cluster_by='user_id',
+        partition_by={
+          "field": "first_seen_timestamp",
+          "data_type": "timestamp",
+          "granularity": "day"
+        }
     )
 }}
 

@@ -2,7 +2,8 @@
     config(schema='staging',
         materialized='table',
         dist='sender_id',
-        sort=['timestamp']
+        sort=['timestamp'],
+        cluster_by='sender_id'
     )
 }}
 

@@ -15,3 +15,20 @@ rasa_semantic_schema:
       # search_path: public # optional, not recommended
       #sslmode: [optional, set the sslmode used to connect to the database (in case this parameter is set, will look for ca in ~/.postgresql/root.crt)]
       ra3: true # enables cross-database sources
+
+
+rasa_semantic_schema_bigquery:
+  target: analytics
+  outputs:
+    analytics:
+      type: bigquery
+      method: service-account
+      project: "{{ env_var('PROJECT_ID') }}"
+      schema: "{{ var('source_schema_prefix') }}"
+      keyfile: /path/to/google_service_account/credential/chat_analytics.json
+      threads: 4
+      keepalives_idle: 0 # default 0, indicating the system default
+      connect_timeout: 10 # default 10 seconds
+      # search_path: public # optional, not recommended
+      #sslmode: [optional, set the sslmode used to connect to the database (in case this parameter is set, will look for ca in ~/.postgresql/root.crt)]
+      #ra3: true # enables cross-database sources

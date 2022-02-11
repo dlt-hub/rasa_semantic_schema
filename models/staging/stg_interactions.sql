@@ -2,7 +2,9 @@
     config(
         materialized='table',
         schema='staging',
-        dist='sender_id'
+        dist='sender_id',
+        cluster_by='sender_id'
+
     )
 }}
 
@@ -44,4 +46,4 @@ LEFT JOIN {{ source('events', 'event_session_started') }} AS ss
 LEFT JOIN {{ ref('story_intents') }} AS si
  ON si.intent_name = u.parse_data__intent__name
 GROUP BY 1,2,3,4,5,6,7
-ORDER BY interaction_initiation_timestamp
+--ORDER BY interaction_initiation_timestamp
