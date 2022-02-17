@@ -25,23 +25,17 @@ rasa_semantic_schema_bigquery:
       method: service-account-json
       project: "{{ env_var('PROJECT_ID') }}"
       schema: "{{ var('dest_schema_prefix', var('source_schema_prefix')) }}"
-      # keyfile: /path/to/google_service_account/credential/chat_analytics.json
       keyfile_json:
         type: service_account
         project_id: "{{ env_var('PROJECT_ID') }}"
-        # private_key_id: xxx
         private_key: "{{ env_var('BQ_CRED_PRIVATE_KEY') }}"
         client_email: "{{ env_var('BQ_CRED_CLIENT_EMAIL') }}"
-        # client_id: xxx
-        # auth_uri: xxx
         token_uri: "{{ env_var('BQ_CRED_TOKEN_URI') }}"
-        # auth_provider_x509_cert_url: xxx
-        # client_x509_cert_url: xxx
       threads: 4
       keepalives_idle: 0 # default 0, indicating the system default
       connect_timeout: 10 # default 10 seconds
 
-rasa_semantic_schema_bigquery_service_json:
+rasa_semantic_schema_bigquery_service_file:
   target: analytics
   outputs:
     analytics:
@@ -49,7 +43,7 @@ rasa_semantic_schema_bigquery_service_json:
       method: service-account
       project: "{{ env_var('PROJECT_ID') }}"
       schema: "{{ var('dest_schema_prefix', var('source_schema_prefix')) }}"
-      # keyfile: /path/to/google_service_account/credential/chat_analytics.json
+      keyfile: "{{ env_var('KEY_FILE_PATH') }}"
       threads: 4
       keepalives_idle: 0 # default 0, indicating the system default
       connect_timeout: 10 # default 10 seconds
