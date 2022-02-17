@@ -6,36 +6,35 @@
 
 SELECT * FROM (
 
-{{ test_accepted_values(
-    get_where_subquery_explicit(ref('stg_event_sequence'), where="user_id = 'third_external_user'"),
-    "sender_id",
-    values=['e040fe0d-ad49-4388-af2a-379e1d6e24f7', '3bb78215-4a2b-475e-96a8-acf83eb037a8', '2459448537496790'])
-}}
-
-)
-UNION ALL SELECT * FROM (
-
 --- user with overlapping sessions
 {{ test_accepted_values(
     get_where_subquery_explicit(ref('stg_event_sequence'), where="user_id = 'second_external_user'"),
     "session_id",
     values=[
-        "2627334840657340/1",
-        "2627334840657340/2",
-        "2627334840657340/3",
-        "2627334840657340/5",
-        "2627334840657340/6",
-        "16bc6379-0fc7-41ee-b1b9-b8054f59f20a/8",
-        "2627334840657340/11",
-        "2627334840657340/12",
-        "2627334840657340/13",
-        "2627334840657340/4",
-        "16bc6379-0fc7-41ee-b1b9-b8054f59f20a/7",
-        "16bc6379-0fc7-41ee-b1b9-b8054f59f20a/9",
-        "16bc6379-0fc7-41ee-b1b9-b8054f59f20a/10",
-        "2627334840657340/14",
+        "second_external_user/1",
+        "second_external_user/2",
+        "second_external_user/3",
+        "second_external_user/4",
+        "second_external_user/5"
     ])
 }}
+
+)
+UNION ALL SELECT * FROM (
+
+--- user with overlapping sessions - verify interaction ids
+{%- set interactions = [] -%}
+{%- for i_nr in range(20) -%}
+{%- set tmp = interactions.append("second_external_user/2/" + i_nr|string) -%}}
+{%- endfor -%}
+
+{{ test_accepted_values(
+    get_where_subquery_explicit(ref('stg_event_sequence'), where="user_id = 'second_external_user' and session_nr = 2"),
+    "interaction_id",
+    values=interactions
+    )
+}}
+
 )
 
 {%- else -%}
