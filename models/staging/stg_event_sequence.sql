@@ -15,7 +15,11 @@ WITH events AS
 prev_actions as
   (select
     *,
-    lag({{ adapter.quote('timestamp') }}) over (partition by sender_id order by {{ adapter.quote('timestamp') }}) as previous_ts
+    lag({{ adapter.quote('timestamp') }}) over (partition by sender_id order by {{ adapter.quote('timestamp') }}) as previous_ts,
+    lead(event) over (partition by sender_id order by {{ adapter.quote('timestamp') }}) as next_event,
+    lead(value) over (partition by sender_id order by {{ adapter.quote('timestamp') }}) as next_value,
+    lag(event) over (partition by sender_id order by {{ adapter.quote('timestamp') }}) as previous_event,
+    lag(value) over (partition by sender_id order by {{ adapter.quote('timestamp') }}) as previous_value
   from events
   ),
 sessionify as
@@ -27,8 +31,13 @@ sessionify as
         case when
           (
             -- break session when gap > N minutes for backward compatibility
-            {{ dbt_utils.datediff( 'cast(prev_actions.previous_ts as timestamp)', 'cast(prev_actions.timestamp as timestamp)', 'minute') }} > {{ var('compat_old_session_gap_minutes') }} or
-            (event='action' and value IN ('action_session_start', 'action_restart'))
+            {{ dbt_utils.datediff( 'cast(prev_actions.previous_ts as timestamp)', 'cast(prev_actions.timestamp as timestamp)', 'minute') }} > {{ var('compat_old_session_gap_minutes') }}
+            or (
+            --start from session start event, but if there is a session_started_metadata before it, start from there.
+                ((event='action' and value IN ('action_session_start', 'action_restart')) and not (previous_event = 'slot' and previous_value= 'session_started_metadata'))
+                 OR
+                ((event = 'slot' and value = 'session_started_metadata') and (next_event='action' and next_value IN ('action_session_start', 'action_restart')))
+             )
           )
           then 1 else 0 end
         )
@@ -44,7 +53,7 @@ turnify as
         partition by sender_id, sender_session_nr order by {{ adapter.quote('timestamp') }}rows between unbounded preceding and current row
       ) as interaction_nr,
     -- previous actor in the same session
-    lag(event) over (partition by sender_id order by {{ adapter.quote('timestamp') }}) as previous_actor,
+    --lag(event) over (partition by sender_id order by {{ adapter.quote('timestamp') }}) as previous_actor,
     -- active form in session
     NULLIF(last_value(case when event ='active_loop' then coalesce(value, '---unset') else null end ignore nulls)
       over (partition by sender_id, sender_session_nr order by {{ adapter.quote('timestamp') }} rows between unbounded preceding and current row),
