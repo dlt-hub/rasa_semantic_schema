@@ -2,7 +2,9 @@
     config(
         materialized='table',
         schema='staging',
-        dist='sender_id'
+        dist='sender_id',
+        cluster_by='sender_id'
+
     )
 }}
 
@@ -14,6 +16,6 @@ select
     max(s.session_end_timestamp) as sender_conversation_end_timestamp,
     max(s.session_nr) as sessions_count,
     -- only relevant if sender is a conversation rather than user
-    DATEDIFF('second', min(s.session_initiation_timestamp)::timestamp, max(s.session_end_timestamp)::timestamp) as sender_conversation_duration_seconds
+    {{ dbt_utils.datediff( 'cast(min(s.session_initiation_timestamp) as timestamp)', 'cast(max(s.session_end_timestamp) as timestamp)', 'second') }} as sender_conversation_duration_seconds
 from {{ ref('stg_sessions') }} as s
 group by s.sender_id

@@ -2,6 +2,10 @@ version: 2
 
 sources:
   - name: events
+    quoting:
+      database: true
+      schema: true
+      identifier: true
     schema: "{{ var('source_schema_prefix') }}_event"
     tables:
       - name: event

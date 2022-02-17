@@ -2,7 +2,8 @@
     config(schema='staging',
         materialized='table',
         dist='sender_id',
-        sort=['timestamp']
+        sort=['timestamp'],
+        cluster_by='sender_id'
     )
 }}
 
@@ -14,7 +15,7 @@ with slots as (
         e.session_nr,
         e.interaction_id,
         e.interaction_nr,
-        e."timestamp",
+        e.timestamp,
         e.active_form,
         e.active_form_nr,
         s.name,

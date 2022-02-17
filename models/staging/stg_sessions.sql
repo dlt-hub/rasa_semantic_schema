@@ -2,7 +2,8 @@
     config(
         materialized='table',
         schema='staging',
-        dist='sender_id'
+        dist='sender_id',
+        cluster_by='sender_id'
     )
 }}
 -- Interleaved sort key data structure
@@ -34,7 +35,7 @@ window_functions as (
     min(i.interaction_initiation_timestamp) as session_initiation_timestamp,
     min(i.interaction_start_timestamp)  as session_start_timestamp,
     max(i.interaction_end_timestamp) as session_end_timestamp,
-    DATEDIFF('second', min(i.interaction_initiation_timestamp)::timestamp, max(i.interaction_end_timestamp)::timestamp) as session_duration_seconds,
+    {{ dbt_utils.datediff( 'cast(min(i.interaction_initiation_timestamp) as timestamp)', 'cast(max(i.interaction_end_timestamp) as timestamp)', 'second') }} as session_duration_seconds,
     max(i.interaction_nr) as interactions_count,
     count(DISTINCT i.interaction_active_form) as distinct_forms_activated,
     -- one session has one user and one external session id

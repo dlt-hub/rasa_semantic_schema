@@ -6,7 +6,13 @@
         on_schema_change='fail',
         dist='sender_id',
         sort=['session_initiation_timestamp', 'session_start_timestamp', 'session_end_timestamp'],
-        sort_type='interleaved'
+        sort_type='interleaved',
+        cluster_by=['user_id', 'sender_id'],
+        partition_by={
+          "field": "session_initiation_timestamp",
+          "data_type": "timestamp",
+          "granularity": "day"
+        }
     )
 }}
 -- Interleaved sort key data structure

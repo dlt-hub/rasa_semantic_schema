@@ -3,7 +3,8 @@
         materialized='table',
         schema="staging",
         dist='sender_id',
-        sort=['timestamp']
+        sort=['timestamp'],
+        cluster_by='sender_id'
     )
 }}
 
@@ -14,7 +15,7 @@ WITH events AS
 prev_actions as
   (select
     *,
-    lag("timestamp") over (partition by sender_id order by "timestamp") as previous_ts
+    lag({{ adapter.quote('timestamp') }}) over (partition by sender_id order by {{ adapter.quote('timestamp') }}) as previous_ts
   from events
   ),
 sessionify as
@@ -26,13 +27,13 @@ sessionify as
         case when
           (
             -- break session when gap > N minutes for backward compatibility
-            DATEDIFF('min', prev_actions.previous_ts::timestamp, prev_actions.timestamp::timestamp) > {{ var('compat_old_session_gap_minutes') }} or
+            {{ dbt_utils.datediff( 'cast(prev_actions.previous_ts as timestamp)', 'cast(prev_actions.timestamp as timestamp)', 'minute') }} > {{ var('compat_old_session_gap_minutes') }} or
             (event='action' and value IN ('action_session_start', 'action_restart'))
           )
           then 1 else 0 end
         )
-        over (partition by sender_id order by "timestamp" rows between unbounded preceding and current row),
-      1::bigint) as sender_session_nr
+        over (partition by sender_id order by {{ adapter.quote('timestamp') }} rows between unbounded preceding and current row),
+      cast(1 as bigint) ) as sender_session_nr
     from prev_actions
   ),
 turnify as
@@ -40,13 +41,13 @@ turnify as
     *,
     sum(case when event = 'user' then 1 else 0 end)
       over (
-        partition by sender_id, sender_session_nr order by "timestamp" rows between unbounded preceding and current row
+        partition by sender_id, sender_session_nr order by {{ adapter.quote('timestamp') }}rows between unbounded preceding and current row
       ) as interaction_nr,
     -- previous actor in the same session
-    lag(event) over (partition by sender_id order by "timestamp") as previous_actor,
+    lag(event) over (partition by sender_id order by {{ adapter.quote('timestamp') }}) as previous_actor,
     -- active form in session
     NULLIF(last_value(case when event ='active_loop' then coalesce(value, '---unset') else null end ignore nulls)
-      over (partition by sender_id, sender_session_nr order by "timestamp" rows between unbounded preceding and current row),
+      over (partition by sender_id, sender_session_nr order by {{ adapter.quote('timestamp') }} rows between unbounded preceding and current row),
       '---unset') as active_form,
     -- active form numer in session
     sum(
@@ -54,14 +55,14 @@ turnify as
     ) OVER (PARTITION BY sender_id, sender_session_nr ORDER BY timestamp rows between unbounded preceding and current row) as active_form_nr,
     --  todo: slot fill step - could tag the slot fill that is in progress
     -- first sender session time - used for sorting sessions within the user entity
-     min("timestamp" ) over ( partition by sender_id, sender_session_nr) as sender_session_start
+     min({{ adapter.quote('timestamp') }}) over ( partition by sender_id, sender_session_nr) as sender_session_start
     from sessionify
   )
 select *,
  max(interaction_nr) over (partition by sender_id, sender_session_nr) - interaction_nr as reverse_interaction_nr,
  --user session nr - we take the sender sessions and rank them by start time
  dense_rank() over (partition by user_id order by sender_session_start, sender_session_nr) as session_nr,
- (sender_id ||  '/' ||  session_nr ||  '/'||  interaction_nr) as interaction_id,
- (sender_id ||  '/' ||  session_nr ) as session_id
+ {{ dbt_utils.concat(['user_id', "'/'" , 'sender_id',  "'/'"  ,'sender_session_nr',  "'/'"  ,'interaction_nr']) }} as interaction_id,
+ {{ dbt_utils.concat(['user_id', "'/'" , 'sender_id',  "'/'"  ,'sender_session_nr']) }} as session_id
 from turnify
-order by timestamp asc
+--order by {{ adapter.quote('timestamp') }} asc

@@ -5,7 +5,13 @@
         unique_key='action_record_hash',
         on_schema_change='fail',
         dist='sender_id',
-        sort=['timestamp']
+        sort=['timestamp'],
+        cluster_by='story_action_interaction_sk',
+        partition_by={
+          "field": "timestamp",
+          "data_type": "timestamp",
+          "granularity": "day"
+        }
     )
 }}
 
@@ -27,4 +33,4 @@ SELECT
 FROM {{ ref('stg_event_sequence') }} AS e
 JOIN {{ source('events', 'event_action') }} AS a
     on a._record_hash = e._record_hash and e.sender_id = a.sender_id -- use dist key
-ORDER BY "timestamp"
+--ORDER BY "timestamp"
