@@ -23,6 +23,13 @@ with sender_user_events as
                                 order by _load_id
                                 rows between unbounded preceding and unbounded following) as user_id
     from {{ source('events', 'event_session_started') }} as ss
+    union all
+    -- take pure session bounces where user id was not present
+    select distinct  sender_id,
+            _load_id,
+            null as user_id
+    from {{ source('events', 'event_action') }} as ss
+    where name IN ('action_listen', 'action_session_start')
 ),
 sender_users as
     (select sender_id,
