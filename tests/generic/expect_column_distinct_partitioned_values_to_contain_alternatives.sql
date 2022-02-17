@@ -1,14 +1,14 @@
-{% test expect_column_distinct_partitioned_values_to_contain_set(model,
+{% test expect_column_distinct_partitioned_values_to_contain_alternatives(model,
                                                             column_name,
-                                                            value_set,
+                                                            alternatives,
                                                             partition_column,
                                                             quote_values=True
                                                             ) %}
 
 {%- if quote_values -%}
-{%-    set in_set = "\'" + value_set|join("\', \'") + "\'" -%}
+{%-    set in_set = "\'" + alternatives|join("\', \'") + "\'" -%}
 {%- else -%}
-{%-    set in_set = value_set|join(", ") -%}
+{%-    set in_set = alternatives|join(", ") -%}
 {%- endif -%}
 
 with all_partitions as (
