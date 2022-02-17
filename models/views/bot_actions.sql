@@ -32,7 +32,12 @@ SELECT
     e.interaction_id as bot_interaction_sk,
     e.interaction_id as user_interaction_fk,
     e.interaction_id as action_interaction_fk,
-    {{ dbt_utils.concat(['senders.user_id', "'/'" , 'e.sender_id',  "'/'"  ,'e.sender_session_nr',  "'/'"  ,'(e.interaction_nr +1)']) }} as next_user_interaction_fk
+    (case when e.reverse_interaction_nr = 0 then
+        cast(null as {{ dbt_utils.type_string() }})
+    else
+        {{ dbt_utils.concat(['senders.user_id', "'/'", 'e.session_nr',  "'/'"  ,'(e.interaction_nr +1)']) }}
+    end
+    )  as next_user_interaction_fk
 FROM {{ ref('stg_event_sequence') }} as e
 INNER JOIN {{ source('events', 'event_bot') }} AS b
     on b._record_hash = e._record_hash and e.sender_id = b.sender_id -- use dist key
