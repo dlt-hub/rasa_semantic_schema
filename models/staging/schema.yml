@@ -31,13 +31,65 @@ models:
       - name: _record_hash
         tests:
           - unique
-          - not_null  
+          - not_null
+          # all slots must be processed
+          - relationships:
+              to: ref('slots')
+              field: slot_record_hash
+              where: "event = 'slot'"
+      - name: session_nr
+        tests:
+          # this test will not pass for some edge cases:
+          # when the session starts and in meantime several other sessions for the same user id start
+          # the session nr can go up by more than 1 then go down (when partitioned by user_id)
+          # - expect_column_values_to_be_progressing_in_partition:
+          #     sort_column: timestamp
+          #     partition_column: user_id
+          #     # increasing monotonically by 1
+          #     min_diff: 0
+          #     max_diff: 1
+          - expect_column_values_to_be_progressing_in_partition:
+              sort_column: timestamp
+              partition_column: sender_id
+              # increasing monotonically (sessions may start within an ongoing session)
+              # so increase on session_nr > 1
+              min_diff: 0
+              max_diff: 100000000
+    tests:
+      # all events from the source must be processed
+      - dbt_expectations.expect_table_row_count_to_equal_other_table:
+          compare_model: ref('events')
+      - dbt_expectations.expect_table_row_count_to_equal_other_table:
+          compare_model: source('events', 'event_user')
+          where: "event = 'user'"
+      - dbt_expectations.expect_table_row_count_to_equal_other_table:
+          compare_model: source('events', 'event_bot')
+          where: "event = 'bot'"
+      - dbt_expectations.expect_table_row_count_to_equal_other_table:
+          compare_model: source('events', 'event_slot')
+          where: "event = 'slot'"
+      - dbt_expectations.expect_table_row_count_to_equal_other_table:
+          compare_model: source('events', 'event_action')
+          where: "event = 'action'"
+      - dbt_expectations.expect_table_row_count_to_equal_other_table:
+          compare_model: source('events', 'event_active_loop')
+          where: "event = 'active_loop'"
+      - dbt_expectations.expect_table_row_count_to_equal_other_table:
+          compare_model: source('events', 'event_session_started')
+          where: "event = 'session_started'"
   - name: stg_slots
     columns:
       - name: slot_record_hash
         tests:
           - unique
           - not_null
+      - name: slot_action_normalised
+        tests:
+          # slots can only be requested in form context
+          # test is not passing due to bugs in the bot code and tracker
+          # - accepted_values:
+          #     values: ['filled_slot']
+          #     where: "active_form is NULL and value is not NULL"
   - name: stg_interactions
     columns:
       - name: interaction_id
@@ -52,6 +104,29 @@ models:
         tests:
           - unique
           - not_null
+      - name: session_nr
+        tests:
+          - expect_column_values_to_be_progressing_in_partition:
+              sort_column: session_initiation_timestamp
+              partition_column: user_id
+              # increasing strictly by 1
+              min_diff: 1
+              max_diff: 1
+          - expect_column_values_to_be_progressing_in_partition:
+              sort_column: session_initiation_timestamp
+              partition_column: sender_id
+              # increasing strictly
+              min_diff: 1
+              max_diff: 1000000
+          # sessions cannot be 0
+          - dbt_expectations.expect_column_values_to_not_be_in_set:
+              value_set: [0]
+              quote_values: false
+          # sessions must start from 1 for each user id
+          - expect_column_distinct_partitioned_values_to_contain_set:
+              value_set: [1]
+              partition_column: user_id
+              quote_values: false
   - name: stg_senders
     columns:
       - name: sender_id
