@@ -67,11 +67,22 @@ turnify as
      min({{ adapter.quote('timestamp') }}) over ( partition by sender_id, sender_session_nr) as sender_session_start
     from sessionify
   )
-select *,
- max(interaction_nr) over (partition by sender_id, sender_session_nr) - interaction_nr as reverse_interaction_nr,
- --user session nr - we take the sender sessions and rank them by start time
- dense_rank() over (partition by user_id order by sender_session_start, sender_session_nr) as session_nr,
- {{ dbt_utils.concat(['user_id', "'/'" , 'sender_id',  "'/'"  ,'sender_session_nr',  "'/'"  ,'interaction_nr']) }} as interaction_id,
- {{ dbt_utils.concat(['user_id', "'/'" , 'sender_id',  "'/'"  ,'sender_session_nr']) }} as session_id
+select
+    _record_hash,
+    sender_id,
+    user_id,
+    interaction_nr,
+    event,
+    value,
+    model_id,
+    {{ adapter.quote('timestamp') }},
+    active_form,
+    active_form_nr,
+    sender_session_nr,
+    max(interaction_nr) over (partition by sender_id, sender_session_nr) - interaction_nr as reverse_interaction_nr,
+    --user session nr - we take the sender sessions and rank them by start time
+    dense_rank() over (partition by user_id order by sender_session_start, sender_session_nr) as session_nr,
+    {{ dbt_utils.concat(['user_id', "'/'" , 'sender_id',  "'/'"  ,'sender_session_nr',  "'/'"  ,'interaction_nr']) }} as interaction_id,
+    {{ dbt_utils.concat(['user_id', "'/'" , 'sender_id',  "'/'"  ,'sender_session_nr']) }} as session_id
 from turnify
 --order by {{ adapter.quote('timestamp') }} asc
