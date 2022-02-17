@@ -1,4 +1,4 @@
-rasa_semantic_schema:
+rasa_semantic_schema_redshift:
   target: analytics
   outputs:
     analytics:
@@ -24,11 +24,32 @@ rasa_semantic_schema_bigquery:
       type: bigquery
       method: service-account
       project: "{{ env_var('PROJECT_ID') }}"
-      schema: "{{ var('source_schema_prefix') }}"
-      keyfile: /path/to/google_service_account/credential/chat_analytics.json
+      schema: "{{ var('dest_schema_prefix', var('source_schema_prefix')) }}"
+      # keyfile: /path/to/google_service_account/credential/chat_analytics.json
+      keyfile_json:
+        type: service_account
+        project_id: "{{ env_var('PROJECT_ID') }}"
+        # private_key_id: xxx
+        private_key: "{{ env_var('BQ_CRED_PRIVATE_KEY') }}"
+        client_email: "{{ env_var('BQ_CRED_CLIENT_EMAIL') }}"
+        # client_id: xxx
+        # auth_uri: xxx
+        token_uri: "{{ env_var('BQ_CRED_TOKEN_URI') }}"
+        # auth_provider_x509_cert_url: xxx
+        # client_x509_cert_url: xxx
       threads: 4
       keepalives_idle: 0 # default 0, indicating the system default
       connect_timeout: 10 # default 10 seconds
-      # search_path: public # optional, not recommended
-      #sslmode: [optional, set the sslmode used to connect to the database (in case this parameter is set, will look for ca in ~/.postgresql/root.crt)]
-      #ra3: true # enables cross-database sources
+
+rasa_semantic_schema_bigquery_service_json:
+  target: analytics
+  outputs:
+    analytics:
+      type: bigquery
+      method: service-account
+      project: "{{ env_var('PROJECT_ID') }}"
+      schema: "{{ var('dest_schema_prefix', var('source_schema_prefix')) }}"
+      # keyfile: /path/to/google_service_account/credential/chat_analytics.json
+      threads: 4
+      keepalives_idle: 0 # default 0, indicating the system default
+      connect_timeout: 10 # default 10 seconds
