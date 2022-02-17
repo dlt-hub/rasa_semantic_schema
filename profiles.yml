@@ -22,7 +22,7 @@ rasa_semantic_schema_bigquery:
   outputs:
     analytics:
       type: bigquery
-      method: service-account
+      method: service-account-json
       project: "{{ env_var('PROJECT_ID') }}"
       schema: "{{ var('dest_schema_prefix', var('source_schema_prefix')) }}"
       # keyfile: /path/to/google_service_account/credential/chat_analytics.json
