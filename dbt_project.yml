@@ -1,10 +1,7 @@
 name: 'rasa_semantic_schema'
-version: '1.0.0'
+version: '1.0.1'
 config-version: 2
 require-dbt-version: ">=1.0.0"
-
-# This setting configures which "profile" dbt uses for this project.
-profile: 'rasa_semantic_schema'
 
 # These configurations specify where dbt should look for different types of files.
 # The `source-paths` config, for example, states that models in this project can be
