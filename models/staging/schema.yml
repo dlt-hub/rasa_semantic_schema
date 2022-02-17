@@ -55,6 +55,13 @@ models:
               # so increase on session_nr > 1
               min_diff: 0
               max_diff: 100000000
+      - name: interaction_nr
+        tests:
+          - expect_column_distinct_partitioned_values_to_contain_alternatives:
+              alternatives: [0, 1]
+              partition_column: session_id
+              quote_values: false
+
     tests:
       # all events from the source must be processed
       - dbt_expectations.expect_table_row_count_to_equal_other_table:
@@ -123,8 +130,8 @@ models:
               value_set: [0]
               quote_values: false
           # sessions must start from 1 for each user id
-          - expect_column_distinct_partitioned_values_to_contain_set:
-              value_set: [1]
+          - expect_column_distinct_partitioned_values_to_contain_alternatives:
+              alternatives: [1]
               partition_column: user_id
               quote_values: false
   - name: stg_senders

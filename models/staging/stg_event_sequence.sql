@@ -66,7 +66,14 @@ turnify as
     -- first sender session time - used for sorting sessions within the user entity
      min({{ adapter.quote('timestamp') }}) over ( partition by sender_id, sender_session_nr) as sender_session_start
     from sessionify
-  )
+  ),
+session_numbers as (
+    select
+      *,
+      --user session nr - we take the sender sessions and rank them by start time
+      dense_rank() over (partition by user_id order by sender_session_start, sender_session_nr) as session_nr
+    from turnify
+)
 select
     _record_hash,
     sender_id,
@@ -75,14 +82,13 @@ select
     event,
     value,
     model_id,
-    {{ adapter.quote('timestamp') }},
+    `timestamp`,
     active_form,
     active_form_nr,
+    session_nr,
     sender_session_nr,
     max(interaction_nr) over (partition by sender_id, sender_session_nr) - interaction_nr as reverse_interaction_nr,
-    --user session nr - we take the sender sessions and rank them by start time
-    dense_rank() over (partition by user_id order by sender_session_start, sender_session_nr) as session_nr,
-    {{ dbt_utils.concat(['user_id', "'/'" , 'sender_id',  "'/'"  ,'sender_session_nr',  "'/'"  ,'interaction_nr']) }} as interaction_id,
-    {{ dbt_utils.concat(['user_id', "'/'" , 'sender_id',  "'/'"  ,'sender_session_nr']) }} as session_id
-from turnify
---order by {{ adapter.quote('timestamp') }} asc
+    user_id || '/' || session_nr || '/' || interaction_nr as interaction_id,
+    user_id || '/' || session_nr as session_id
+from session_numbers
+--order by `timestamp` asc
