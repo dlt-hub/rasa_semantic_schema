@@ -44,4 +44,31 @@ models:
         tests:
           - unique
           - not_null
-      
+  - name: bot_actions
+    columns:
+      - name: bot_record_hash
+        tests:
+          - unique
+          - not_null
+      - name: next_user_interaction_fk
+        tests:
+          - relationships:
+              to: ref('interactions')
+              field: interaction_id
+           # next_user_interaction_fk must have non null values
+          - dbt_expectations.expect_column_unique_value_count_to_be_between:
+              min_value: 1
+  - name: user_messages
+    columns:
+      - name: user_message_record_hash
+        tests:
+          - unique
+          - not_null
+      - name: previous_bot_interaction_fk
+        tests:
+          - relationships:
+              to: ref('interactions')
+              field: interaction_id
+           # next_user_interaction_fk must have non null values
+          - dbt_expectations.expect_column_unique_value_count_to_be_between:
+              min_value: 1
