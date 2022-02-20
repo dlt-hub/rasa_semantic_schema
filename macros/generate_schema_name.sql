@@ -7,7 +7,7 @@
 
     {%- elif custom_schema_name == "event" -%}
 
-        {{ var('source_schema_prefix') }}_event
+        {{ default_schema }}_{{ custom_schema_name | trim }}
 
     {%- else -%}
 
