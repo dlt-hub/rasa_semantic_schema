@@ -18,8 +18,13 @@ jobs:
     name: Runs tests on run_test_fixture_carbon_bot_session_cases
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        dbt_vars: ["{source_schema_prefix: test_fixture_carbon_bot_session_cases, user_id: metadata__user_id,  dest_schema_prefix: test_fixture_carbon_bot_session_cases_github_ci}",
+                   "{source_schema_prefix: test_fixture_jm, user_id: metadata__user_id, external_session_id: metadata__mitter_id, dest_schema_prefix: test_fixture_jm_github_ci}"]
+
     env:
-      COMMON_CLI_PARAMS: '--profiles-dir . --profile rasa_semantic_schema_bigquery --vars "{source_schema_prefix: test_fixture_carbon_bot_session_cases, user_id: metadata__user_id,  dest_schema_prefix: test_fixture_carbon_bot_session_cases_github_ci}"'
+      COMMON_CLI_PARAMS: '--profiles-dir . --profile rasa_semantic_schema_bigquery --vars "${{ matrix.dbt_vars }}"'
 
     steps:
 
