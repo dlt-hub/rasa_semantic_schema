@@ -6,3 +6,4 @@ logs/
 .user.yml
 .vscode
 /*.sql
+.env
