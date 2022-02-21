@@ -1,0 +1,54 @@
+
+name: test_redshift
+
+on:
+  pull_request:
+    branches:
+      - master
+
+env:
+  PG_HOST: 3.66.204.141
+  PG_USER: loader
+  PG_PASSWORD: ${{ secrets.PG_PASSWORD }}
+  PG_DATABASE_NAME: chat_analytics_rasa_ci
+
+jobs:
+  
+  run_test_fixture_carbon_bot_session_cases:
+    name: Runs tests on run_test_fixture_carbon_bot_session_cases
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        dbt_vars: ["{source_schema_prefix: test_fixture_carbon_bot_session_cases, user_id: metadata__user_id,  dest_schema_prefix: test_fixture_carbon_bot_session_cases_github_ci}",
+                   "{source_schema_prefix: test_fixture_jm, user_id: metadata__user_id, external_session_id: metadata__mitter_id, dest_schema_prefix: test_fixture_jm_github_ci}"]
+
+    env:
+      COMMON_CLI_PARAMS: '--profiles-dir . --profile rasa_semantic_schema_redshift --vars "${{ matrix.dbt_vars }}"'
+
+    steps:
+
+      - name: Check out
+        uses: actions/checkout@master
+
+      - uses: actions/setup-python@v1
+        with:
+          python-version: "3.8.x"
+
+
+      - name: Install dependencies
+        run: |
+          pip install dbt-redshift
+          dbt deps
+      
+      - name: Run seeds
+        run: dbt seed ${{ env.COMMON_CLI_PARAMS }}
+
+      - name: Run source prerequisities tests
+        run: dbt test ${{ env.COMMON_CLI_PARAMS }} -s tag:prerequisities
+
+      - name: Run full refresh
+        run: dbt run ${{ env.COMMON_CLI_PARAMS }} --full-refresh --fail-fast
+
+      - name: Test with units
+        run: dbt test ${{ env.COMMON_CLI_PARAMS }}

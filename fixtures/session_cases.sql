@@ -14,14 +14,15 @@ ALTER TABLE test_fixture_carbon_bot_session_cases_event.event_session_started AD
 COMMIT TRANSACTION;
 
 -- BigQuery
-
+ALTER TABLE test_fixture_carbon_bot_session_cases_event.event_user ADD COLUMN metadata__user_id STRING;
+ALTER TABLE test_fixture_carbon_bot_session_cases_event.event_session_started ADD COLUMN metadata__user_id STRING;
 
 -- Any 
 
 BEGIN TRANSACTION;
 
 UPDATE test_fixture_carbon_bot_session_cases_event.event_user SET
-    metadata__user_id = NULL;
+    metadata__user_id = NULL
 WHERE 1 = 1;
 
 -- create a user that has overlapping sessions with several intertwined messaged
