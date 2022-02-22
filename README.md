@@ -22,25 +22,7 @@ DBT package will create two more **semantic schemas** by transforming the tracke
 
 All the schemas that correspond to a single tracker store share a **schema prefix** that should be supplied both to the pipeline and this package.
 
-## Quickstart Guide for DBT Runner
-[DBT Package Runner](https://github.com/scale-vector/rasa_data_ingestion_deployment/blob/master/autopoiesis/DEPLOYMENT.md#semantic-schema-dbt-package) is one of the component of the Rasa Ingestion Pipeline. It will automate the execution of this package after it is properly customized.
-
-In order to customize the package you should do the following:
-
-1. Fork or clone the package so you can work on your own copy. Forking is the preferred method.
-2. Cutomize the copy of the package if necessary. Several customizations are accessible via configuration in `dbt_project.yml` file.
-3. Push your changes to the repository and confgure access to it as described [here]()
-4. The DBT Runner will use the same configuration settings and secrets that are used for other components. No further configuration is necessary for this method
-
-We advice you to customize your package if
-- you send external user ids in the `metadata` field of the user message
-- you send external session id in the above metadata
-- you want to track handovers and you have a special action(s) or intent(s) in your model that you want to measure in your reports
-- you have any other intent or action that you want to measure ie. if you have intents that indicate that user is frustrated, you can easily configure the package to start measuring them
-- your bot has multiple skills and you need to measure them separately in your reports.
-
 ## Package customizations
-
 ### External user and session ids
 Package allows to use a field passed in `metadata` of `user` or `session_start` event as an user identifer. The default is to use `sender_id` as such. The table `users` is built upon the `user_id` passed and such *user id* is present in `sessions` and `interactions` table.
 
@@ -49,8 +31,7 @@ In the same way, additional session identifier can be passed. Such session ident
 The columns names for user and external session ids may be configured in `dbt_project` or by passing the variables in command line
 
 ```
-dbt run --profiles-dir . --vars "{source_schema_prefix: findemo_eks, user_id: metadata__use
-r_id, external_session_id: metadata__mitter_id}" --fail-fast
+dbt run --profiles-dir . --vars "{source_schema_prefix: findemo_eks, user_id: metadata__user_id, external_session_id: metadata__mitter_id}" --fail-fast
 ```
 
 ### Configuring metrics on actions and intents counts
@@ -65,10 +46,7 @@ Package allows to define actions and intents that are counted in interaction and
 All of those can be set up via seeds or `dbt_project` variables.
 
 ### First story intents
-Package facilitates surfacing intents that open particular scenario, story or a skill. The list of such intents is configured in seeds and available in interaction and session level as `first_intent` field. The list of such intents can be configured via Seeds
-
-### Seeds
-Currently you can define intents that start particular story in the seeds
+Package facilitates surfacing intents that open particular scenario, story or a skill. The list of such intents is configured in seeds and available in interaction and session level as `first_intent` field.
 
 ## Running DBT Package Manually
 Like any other package, this one can be also run from the command line. This is the preferred method when you need to customize it deeper ie. by changing the transformations in `sql` files. 
@@ -132,6 +110,11 @@ will return non 0 exit code if fails
 
 4. run the package incrementally
 5. optionally run tests
+
+## Package Versioning
+major.minor.revision
+revision - without a need for full refresh
+minor - requires full refresh
 
 ## Loads lifecycle and `_loads` table
 Package identifies new data by finding all load identifiers in `_loads` table in `event` schema that have only one entry with status 0.

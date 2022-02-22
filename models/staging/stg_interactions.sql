@@ -26,7 +26,10 @@ SELECT
   -- interaction, otherwise user id in interaction is unknown
   -- external session id is passed in the same way as user id
   max(COALESCE(u.{{ var('external_session_id') }}, ss.{{ var('external_session_id') }})) as external_session_id,
-  max(si.intent_name) as story_intent,
+  -- detect intents opening a story
+  max(
+    case when u.parse_data__intent__name in ({{ "\'" + var('story_intents')|join("\', \'") + "\'" }}) then u.parse_data__intent__name
+    else null end) as story_intent,
   -- bot quality metrics
   {{ generate_interactions_count_metrics('e') }}
   -- keys used for dimension join
@@ -43,7 +46,5 @@ LEFT JOIN {{ source('events', 'event_user') }} AS u
   ON e.event = 'user' AND e._record_hash = u._record_hash  and e.sender_id = u.sender_id -- use dist key
 LEFT JOIN {{ source('events', 'event_session_started') }} AS ss
   ON e.event = 'session_started' AND e._record_hash = ss._record_hash  and e.sender_id = ss.sender_id -- use dist key
-LEFT JOIN {{ ref('story_intents') }} AS si
- ON si.intent_name = u.parse_data__intent__name
 GROUP BY 1,2,3,4,5,6,7
 --ORDER BY interaction_initiation_timestamp

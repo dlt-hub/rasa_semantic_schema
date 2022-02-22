@@ -25,7 +25,6 @@ vars:
 
   # in dictionary below you can configure metrics based on count of occurences intents or actions
   # in conversations or sections
-
   count_metrics:
     # below are standard model performance metrics that could be useful regardless of particular bot business logic
     - intent_out_of_scope:
@@ -56,12 +55,21 @@ vars:
       - utter_redirect_to_faqs
       - action_agent_handoff
 
+  # a list of intents that indicate starting a story/skill, available on interaction and session level
+  story_intents:
+    - request_limit_change
+    - enquire_transaction_failure
+    - request_transaction_refund
+    - view_bill_details
+    - view_transactions
+    - view_user_details
+
   # new session gap (old SDK compat) in minutes (defaults disables check)
   compat_old_session_gap_minutes: 5256000
 
-seeds:
-  # where to store seeds with scenario intents, funnel steps etc.
-  schema: views
+# seeds:
+#   # where to store seeds with scenario intents, funnel steps etc.
+#   schema: views
 
 
 # These configurations specify where dbt should look for different types of files.

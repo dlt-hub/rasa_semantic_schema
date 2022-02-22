@@ -1,8 +1,8 @@
-{%- if var("source_schema_prefix") == "test_fixture_carbon_bot_session_cases" -%}
-
 {{
-    config(tags=["test_fixture_carbon_bot_session_cases", "full", "incremental"])
+    config(tags=["test_fixture_carbon_bot_session_cases", "full", "incremental", "unit"])
 }}
+
+{%- if var("source_schema_prefix") == "test_fixture_carbon_bot_session_cases" -%}
 
 SELECT * FROM (
 
