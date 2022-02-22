@@ -53,7 +53,7 @@ SELECT
   case when interactions_count = 0 then true else false end as is_bounced,
   case when interactions_count = 0 then session_id end as bounced_session_id,
   -- this could be easy done with the users table
-  case when session_nr = 1 then 'new' else 'returning' end as new_returning_session
+  case when session_nr = 1 then 'new' else 'returning' end as new_returning_session,
   -- must be aligned with the count produced by the count metrics macro, configurable in dbt_project yml.
   case when actions_agent_handoff_count > 0 then session_id else null end as handover_session_id
 FROM agg_to_session AS s
