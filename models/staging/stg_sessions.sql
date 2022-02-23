@@ -52,7 +52,8 @@ SELECT
   -- business specific interactions
   case when interactions_count = 0 then true else false end as is_bounced,
   case when interactions_count = 0 then session_id end as bounced_session_id,
-  -- this could be easy done with the users table
-  case when session_nr = 0 then 'new' else 'returning' end as new_returning_session
-  -- case when actions_agent_handoff_count > 0 then session_id else null end as handover_session_id
+  -- is aligned with the count produced by the count metrics macro, configurable in dbt_project yml.
+  {{ generate_event_sesssion_ids_from_counts('s') }}
+  -- this tags the session state at the time and does not rely on current user state
+  case when session_nr = 1 then 'new' else 'returning' end as new_returning_session
 FROM agg_to_session AS s
