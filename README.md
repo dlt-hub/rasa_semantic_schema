@@ -22,8 +22,10 @@ DBT package will create two more **semantic schemas** by transforming the tracke
 
 All the schemas that correspond to a single tracker store share a **schema prefix** that should be supplied both to the pipeline and this package.
 
-## Package customizations
+## How to Use This Package
+We recommend that you add this package as a dependence to your own DBT package. We provide a quick start template [here](https://github.com/scale-vector/rasa_semantic_schema_customization) if you do not have experience with DBT.
 
+## Package customizations
 ### When to Customize the Package
 We advice you to customize your package if
 - you send external user ids in the `metadata` field of the user message
