@@ -19,3 +19,12 @@
     {% endfor %}
   {% endfor %}
 {%- endmacro %}
+
+
+{% macro generate_event_sesssion_ids_from_counts(counts_table) -%}
+  {%- for metric in var('count_metrics')  -%}
+    {%- for metric_name, element_list in metric.items() -%}
+        case when {{counts_table}}.{{ metric_name }}_count > 0 then session_id else null end as {{ metric_name }}_session_id,
+    {% endfor %}
+  {% endfor %}
+{%- endmacro %}

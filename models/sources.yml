@@ -31,7 +31,7 @@ sources:
             tests:
               - dbt_expectations.expect_column_to_exist:
                   config:
-                    tags: prerequisities
+                    tags: prerequisites
   - name: models
     quoting:
       database: true
@@ -41,4 +41,15 @@ sources:
     tables:
       - name: model
         schema: "{{ var('source_schema_prefix') }}_model"
+        columns:
+          - name: model_id
+            tests:
+              - dbt_expectations.expect_column_to_exist:
+                  config:
+                    tags: prerequisites
+          - name: name
+            tests:
+              - dbt_expectations.expect_column_to_exist:
+                  config:
+                    tags: prerequisites
 
