@@ -72,3 +72,9 @@ models:
            # next_user_interaction_fk must have non null values
           - dbt_expectations.expect_column_unique_value_count_to_be_between:
               min_value: 1
+  - name: models
+    columns:
+      - name: model_id
+        tests:
+          - unique
+          - not_null

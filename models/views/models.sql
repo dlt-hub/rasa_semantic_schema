@@ -11,7 +11,6 @@
 }}
 
 SELECT m.*,
-  -- # model_name_custom is configurable from dbt-project.yaml variables
-  {{ bot_model_id_name_map()}}
+  -- override macro to generate other model names
+  {{ generate_readable_model_name()}} as model_name_custom
 from {{ source('models', 'model') }} as m
---ORDER BY {{ adapter.quote('timestamp') }}
