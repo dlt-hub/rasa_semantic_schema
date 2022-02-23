@@ -1,5 +1,5 @@
-# Raw Schemas
-Raw schemas are created by Rasa Ingestion Pipeline by representing tracker store documents and bot models data in relational form. There are two separate schemas created.
+# Source Schemas
+Source schemas are created by Rasa Ingestion Pipeline by representing tracker store documents and bot models data in relational form. There are two separate schemas created.
 
 ## Event Schema
 

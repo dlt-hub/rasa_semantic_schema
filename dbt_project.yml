@@ -23,9 +23,8 @@ vars:
   external_session_id: 'sender_id'
 
 
-  # in dictionary below you can configure metrics based on count of occurences intents or actions
+  # in dictionary below you can configure metrics based on count of occurrences intents or actions
   # in conversations or sections
-
   count_metrics:
     # below are standard model performance metrics that could be useful regardless of particular bot business logic
     - intent_out_of_scope:
@@ -33,7 +32,7 @@ vars:
       - out_of_scope
     - intent_nlu_fallback:
       # (bot does not understand what user wants. that's low confidence situation
-      - nlu_fallack
+      - nlu_fallback
     - action_default_fallback:
       # bot got into situation that does not know what to do next. so there's a problem in the story
       - action_default_fallback
@@ -56,12 +55,21 @@ vars:
       - utter_redirect_to_faqs
       - action_agent_handoff
 
+  # a list of intents that indicate starting a story/skill, available on interaction and session level
+  story_intents:
+    - request_limit_change
+    - enquire_transaction_failure
+    - request_transaction_refund
+    - view_bill_details
+    - view_transactions
+    - view_user_details
+
   # new session gap (old SDK compat) in minutes (defaults disables check)
   compat_old_session_gap_minutes: 5256000
 
-seeds:
-  # where to store seeds with scenario intents, funnel steps etc.
-  schema: views
+# seeds:
+#   # where to store seeds with scenario intents, funnel steps etc.
+#   schema: views
 
 
 # These configurations specify where dbt should look for different types of files.
