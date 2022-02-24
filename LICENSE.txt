@@ -1,0 +1,5 @@
+This repository and all files in it are a part of the Rasa Ingestion Pipeline available under commercial license.
+
+Copyright 2022 Adrian Brudaru, Mätthaus Krzykowski, Marcin Rudolf
+Unauthorized copying of the files included in this repository, via any medium is strictly prohibited
+Written by Adrian Brudaru, Mätthaus Krzykowski, Marcin Rudolf, 2022
