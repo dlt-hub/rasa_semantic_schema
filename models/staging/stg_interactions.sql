@@ -30,7 +30,7 @@ SELECT
   max(
     case when u.parse_data__intent__name in ({{ "\'" + var('story_intents')|join("\', \'") + "\'" }}) then u.parse_data__intent__name
     else null end) as story_intent,
-  u.parse_data__intent__name as intent,
+  max(u.parse_data__intent__name) as intent,
   -- bot quality metrics
   {{ generate_interactions_count_metrics('e') }}
   -- keys used for dimension join
