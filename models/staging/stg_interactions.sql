@@ -27,6 +27,7 @@ SELECT
   -- external session id is passed in the same way as user id
   max(COALESCE(u.{{ var('external_session_id') }}, ss.{{ var('external_session_id') }})) as external_session_id,
   max(si.intent_name) as story_intent,
+  parse_data__intent__name as intent,
   -- bot quality metrics
   {{ generate_interactions_count_metrics('e') }}
   -- keys used for dimension join
