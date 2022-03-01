@@ -73,22 +73,59 @@ session_numbers as (
       --user session nr - we take the sender sessions and rank them by start time
       dense_rank() over (partition by user_id order by sender_session_start, sender_session_nr) as session_nr
     from turnify
-)
-select
-    _record_hash,
-    sender_id,
-    user_id,
-    interaction_nr,
-    event,
-    value,
-    model_id,
-    session_numbers.timestamp,
-    active_form,
-    active_form_nr,
-    session_nr,
-    sender_session_nr,
-    max(interaction_nr) over (partition by sender_id, sender_session_nr) - interaction_nr as reverse_interaction_nr,
-    user_id || '/' || session_nr || '/' || interaction_nr as interaction_id,
-    user_id || '/' || session_nr as session_id
-from session_numbers
+    ),
+    session_with_ids as (
+    select
+        *,
+         -- need to do this over session to not look at older messages
+         -- for answer/reply time, get the other's actor max previous timestamp
+        case
+            when event = 'user'
+             then max(case when event = 'bot' then {{ adapter.quote('timestamp') }} end)
+                    over (partition by user_id, session_nr
+                         order by {{ adapter.quote('timestamp') }}
+                        rows between unbounded preceding and current row)
+            when event = 'bot'
+             then max(case when event = 'user' then {{ adapter.quote('timestamp') }} end)
+                    over (partition by user_id, session_nr
+                         order by {{ adapter.quote('timestamp') }}
+                        rows between unbounded preceding and current row)
+        end as interlocutor_previous_message_timestamp,
+        --
+        case
+            when event = 'user'
+             then min(case when event = 'bot' then {{ adapter.quote('timestamp') }} end)
+                    over (partition by user_id, session_nr
+                         order by {{ adapter.quote('timestamp') }} desc
+                        rows between unbounded preceding and current row)
+            when event = 'bot'
+             then min(case when event = 'user' then {{ adapter.quote('timestamp') }} end)
+                    over (partition by user_id, session_nr
+                         order by {{ adapter.quote('timestamp') }} desc
+                        rows between unbounded preceding and current row)
+        end as interlocutor_next_message_timestamp,
+        --
+        max(interaction_nr) over (partition by sender_id, sender_session_nr) - interaction_nr as reverse_interaction_nr,
+        user_id || '/' || session_nr || '/' || interaction_nr as interaction_id,
+        user_id || '/' || session_nr as session_id
+    from session_numbers
+    )
+select _record_hash,
+        sender_id,
+        user_id,
+        interaction_nr,
+        event,
+        value,
+        model_id,
+        session_with_ids.timestamp,
+        active_form,
+        active_form_nr,
+        session_nr,
+        sender_session_nr,
+        reverse_interaction_nr,
+        interaction_id,
+        session_id,
+        {{ dbt_utils.datediff( 'cast(interlocutor_previous_message_timestamp as timestamp)', 'cast(session_with_ids.timestamp as timestamp)', 'second') }} as reply_time_seconds,
+        {{ dbt_utils.datediff( 'cast(session_with_ids.timestamp as timestamp)', 'cast(interlocutor_next_message_timestamp as timestamp)', 'second') }} as next_reply_time_seconds
+from session_with_ids
 --order by `timestamp` asc
