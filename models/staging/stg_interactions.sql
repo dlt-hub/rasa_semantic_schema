@@ -25,7 +25,7 @@ SELECT
   -- user id comes in session_started or user events metadata. one of those events must be present in each
   -- interaction, otherwise user id in interaction is unknown
   -- external session id is passed in the same way as user id
-  max(COALESCE(u.{{ var('external_session_id') }}, ss.{{ var('external_session_id') }})) as external_session_id,
+  max(u.{{ var('external_session_id') }}) as external_session_id,
   -- detect intents opening a story
   max(
     case when u.parse_data__intent__name in ({{ "\'" + var('story_intents')|join("\', \'") + "\'" }}) then u.parse_data__intent__name
