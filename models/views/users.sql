@@ -17,7 +17,7 @@
 -- depends_on: {{ ref('stg_senders') }}
 SELECT distinct
     s.user_id, -- primary key
-    min(s.session_start_timestamp) OVER (PARTITION BY s.user_id rows between unbounded preceding and unbounded following) as first_seen_timestamp,
+    min(s.session_initiation_timestamp) OVER (PARTITION BY s.user_id rows between unbounded preceding and unbounded following) as first_seen_timestamp,
     max(s.session_end_timestamp) OVER (PARTITION BY s.user_id rows between unbounded preceding and unbounded following) as last_seen_timestamp,
     count(s.session_id) OVER (PARTITION BY s.user_id rows between unbounded preceding and unbounded following) as sessions_count,
     -- count(DISTINCT s.sender_id) OVER (PARTITION BY s.user_id) as senders_count,
