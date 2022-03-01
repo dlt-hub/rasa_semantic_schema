@@ -24,9 +24,11 @@ SELECT events.*,
       SELECT  sender_id, _record_hash, event, {{ adapter.quote('timestamp') }}, name as value, model_id, _load_id
       FROM {{ source('events', 'event_action') }} as a
     union all
+{% if has_active_loop() %}
       SELECT  sender_id, _record_hash, event, {{ adapter.quote('timestamp') }}, name as value, model_id, _load_id
       FROM {{ source('events', 'event_active_loop') }} as l
     union all
+{% endif %}
       -- contains session metadata
       SELECT  sender_id, _record_hash, event, {{ adapter.quote('timestamp') }}, NULL as value, model_id, _load_id
       FROM {{ source('events', 'event_session_started') }} as ss
