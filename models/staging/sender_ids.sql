@@ -17,13 +17,14 @@ with sender_user_events as
     from {{ source('events', 'event_user') }} as u
 
     union all
-    select distinct  sender_id,
-            _load_id,
-            max(ss.{{ var('user_id') }}) over (partition by sender_id
-                                order by _load_id
-                                rows between unbounded preceding and unbounded following) as user_id
-    from {{ source('events', 'event_session_started') }} as ss
-    union all
+    -- SDK 2.8 does not send metadata in event_session_started anymore
+    -- select distinct  sender_id,
+    --         _load_id,
+    --         max(ss.{{ var('user_id') }}) over (partition by sender_id
+    --                             order by _load_id
+    --                             rows between unbounded preceding and unbounded following) as user_id
+    -- from {{ source('events', 'event_session_started') }} as ss
+    -- union all
     -- take pure session bounces where user id was not present
     select distinct  sender_id,
             _load_id,
