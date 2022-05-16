@@ -1,7 +1,7 @@
 name: 'rasa_semantic_schema'
-version: '1.0.1'
+version: '1.2.0'
 config-version: 2
-require-dbt-version: ">=1.0.0"
+require-dbt-version: [">=1.0.0", "<1.1.0"]
 
 
 # provide a profile name to access particular warehouse, following profiles are available

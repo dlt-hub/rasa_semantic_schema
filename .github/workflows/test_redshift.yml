@@ -38,7 +38,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install dbt-redshift
+          pip install dbt-redshift==1.0.1
           dbt deps
       
       - name: Run seeds
