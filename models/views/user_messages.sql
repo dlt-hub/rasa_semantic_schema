@@ -25,6 +25,8 @@ SELECT
     u.parse_data__intent__name as intent_name,
     u.parse_data__intent__confidence as intent_confidence,
     u.input_channel,
+    u.model_id,
+    u.environment,
     e.session_nr,
     e.interaction_nr,
     e.interaction_id as interaction_id,

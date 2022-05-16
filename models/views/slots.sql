@@ -18,6 +18,8 @@
 SELECT
     s.slot_record_hash, -- primary key
     s.sender_id,
+    s.model_id,
+    s.environment,
     s.name,
     s.value,
     s.slot_name_normalised,

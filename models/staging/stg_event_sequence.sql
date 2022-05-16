@@ -82,6 +82,7 @@ select
     event,
     value,
     model_id,
+    environment,
     session_numbers.timestamp,
     active_form,
     active_form_nr,
