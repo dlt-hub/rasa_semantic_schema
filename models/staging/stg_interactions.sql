@@ -22,7 +22,7 @@ SELECT
   max(e.timestamp) as interaction_end_timestamp,
   max(active_form) as interaction_active_form,
   max(e.model_id) as interaction_model_id,
-  max(environment) as interaction_environment,
+  max(environment) as environment,
   -- user id comes in session_started or user events metadata. one of those events must be present in each
   -- interaction, otherwise user id in interaction is unknown
   -- external session id is passed in the same way as user id
