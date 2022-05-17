@@ -50,6 +50,34 @@ UPDATE test_fixture_carbon_bot_session_cases_event.event_user SET
     metadata__user_id = 'fifth_external_user'
 WHERE sender_id IN ('2485257761521706');
 
+-- set environment to development for one session
+UPDATE test_fixture_carbon_bot_session_cases_event.event_user SET
+    environment = 'development'
+WHERE sender_id IN ('3d9a4658-a8fd-4e0a-976f-02b8f8abc52b');
+UPDATE test_fixture_carbon_bot_session_cases_event.event_bot SET
+    environment = 'development'
+WHERE sender_id IN ('3d9a4658-a8fd-4e0a-976f-02b8f8abc52b');
+UPDATE test_fixture_carbon_bot_session_cases_event.event_slot SET
+    environment = 'development'
+WHERE sender_id IN ('3d9a4658-a8fd-4e0a-976f-02b8f8abc52b');
+UPDATE test_fixture_carbon_bot_session_cases_event.event_action SET
+    environment = 'development'
+WHERE sender_id IN ('3d9a4658-a8fd-4e0a-976f-02b8f8abc52b');
+UPDATE test_fixture_carbon_bot_session_cases_event.event_active_loop SET
+    environment = 'development'
+WHERE sender_id IN ('3d9a4658-a8fd-4e0a-976f-02b8f8abc52b');
+UPDATE test_fixture_carbon_bot_session_cases_event.event_session_started SET
+    environment = 'development'
+WHERE sender_id IN ('3d9a4658-a8fd-4e0a-976f-02b8f8abc52b');
+
+-- set environment to test for last user event in the session to test unlikely case with changing env during session
+UPDATE test_fixture_carbon_bot_session_cases_event.event SET
+    environment = 'test'
+WHERE _record_hash = '93bf435209febf19591258664d33d64f';
+UPDATE test_fixture_carbon_bot_session_cases_event.event_user SET
+    environment = 'test'
+WHERE _record_hash = '93bf435209febf19591258664d33d64f';
+
 COMMIT TRANSACTION;
 
 
