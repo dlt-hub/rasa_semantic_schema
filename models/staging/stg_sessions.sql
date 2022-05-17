@@ -29,7 +29,7 @@ window_functions as (
         (partition by session_id
          order by interaction_initiation_timestamp
          ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-         ) as environment
+         ) as first_environment
       FROM {{ ref('stg_interactions') }} AS i
 )
 ,agg_to_session AS
@@ -38,6 +38,7 @@ window_functions as (
     i.session_id, -- primary key
     i.sender_id,
     i.session_nr,
+    max(i.first_environment) as environment,
     max(i.first_bot_model) as first_bot_model,
     max(i.first_story_intent) as first_story_intent,
     min(i.interaction_initiation_timestamp) as session_initiation_timestamp,
