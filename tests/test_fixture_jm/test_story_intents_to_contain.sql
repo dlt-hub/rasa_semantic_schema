@@ -6,7 +6,7 @@
 
 SELECT * FROM (
 
-{{ test_accepted_values(
+{{ test_expect_distinct_values(
     get_where_subquery_explicit(ref('stg_interactions')),
     "story_intent",
     values=['request_limit_change', 'enquire_transaction_failure', 'request_transaction_refund', 'view_bill_details', 'view_transactions', 'view_user_details'])
@@ -15,7 +15,7 @@ SELECT * FROM (
 )
 UNION ALL SELECT * FROM (
 
-{{ test_accepted_values(
+{{ test_expect_distinct_values(
     get_where_subquery_explicit(ref('stg_sessions')),
     "first_story_intent",
     values=['request_limit_change', 'enquire_transaction_failure', 'request_transaction_refund', 'view_bill_details', 'view_transactions', 'view_user_details'])
