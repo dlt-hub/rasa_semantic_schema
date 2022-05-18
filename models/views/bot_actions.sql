@@ -18,6 +18,7 @@
 SELECT
     e._record_hash as bot_record_hash,
     e.model_id,
+    e.environment,
     -- we could customize text extraction if bot uses formatters, that may require joing with child tables
     b.text,
     senders.user_id,

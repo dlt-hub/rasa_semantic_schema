@@ -12,16 +12,24 @@
 WITH
 window_functions as (
     select i.*,
+    --story
       first_value(story_intent ignore nulls) over
         (partition by session_id
          order by interaction_initiation_timestamp
          ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
          ) as first_story_intent,
+         -- model
            first_value(interaction_model_id ignore nulls) over
         (partition by session_id
          order by interaction_initiation_timestamp
          ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-         ) as first_bot_model
+         ) as first_bot_model,
+         -- env
+           first_value(environment ignore nulls) over
+        (partition by session_id
+         order by interaction_initiation_timestamp
+         ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+         ) as first_environment
       FROM {{ ref('stg_interactions') }} AS i
 )
 ,agg_to_session AS
@@ -30,6 +38,7 @@ window_functions as (
     i.session_id, -- primary key
     i.sender_id,
     i.session_nr,
+    max(i.first_environment) as environment,
     max(i.first_bot_model) as first_bot_model,
     max(i.first_story_intent) as first_story_intent,
     min(i.interaction_initiation_timestamp) as session_initiation_timestamp,

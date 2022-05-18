@@ -11,6 +11,8 @@ with slots as (
     SELECT DISTINCT
         e._record_hash as slot_record_hash,
         e.sender_id,
+        e.model_id,
+        e.environment,
         e.session_id,
         e.session_nr,
         e.interaction_id,

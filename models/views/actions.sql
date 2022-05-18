@@ -21,6 +21,7 @@ SELECT
     a.confidence,
     --
     e.model_id,
+    e.environment,
     e.timestamp,
     e.value as action_name,
     e.sender_id,
