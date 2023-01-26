@@ -42,7 +42,7 @@ In the same way, additional session identifier can be passed. Such session ident
 The columns names for user and external session ids may be configured in `dbt_project` or by passing the variables in command line
 
 ```
-dbt run --profiles-dir . --vars "{source_schema_prefix: findemo_eks, user_id: metadata__user_id, external_session_id: metadata__mitter_id}" --fail-fast
+dbt run --profiles-dir . --vars "{source_dataset_name: findemo_eks, user_id: metadata__user_id, external_session_id: metadata__mitter_id}" --fail-fast
 ```
 
 ### Configuring metrics on actions and intents counts
@@ -77,7 +77,7 @@ To use any of the profiles
 The documentation is provided [here](https://github.com/scale-vector/rasa_data_ingestion_deployment/blob/master/autopoiesis/DEPLOYMENT.md#redshift-access).
 
 ### Specify the Schema Prefix
-The prefix to the schema is passed in `source_schema_prefix` variable to each dbt command.
+The prefix to the schema is passed in `source_dataset_name` variable to each dbt command.
 
 ### Run The Package
 
@@ -87,21 +87,21 @@ dbt deps --profiles-dir .
 ```
 2. update seeds
 ```
-dbt seed --profiles-dir . --vars "{source_schema_prefix: findemo_eks}"
+dbt seed --profiles-dir . --vars "{source_dataset_name: findemo_eks}"
 ```
 
 3. run the package
 ```
-dbt run --profiles-dir . --vars "{source_schema_prefix: findemo_eks}" --fail-fast
+dbt run --profiles-dir . --vars "{source_dataset_name: findemo_eks}" --fail-fast
 ```
 
 ### Easy Experimentation with Destination Schema Prefix
-By default destination (`staging` and `views`) schemas will use the same schema prefix as **source schemas** (`event` and `model`). Alternative destination schema prefix can be specified with `dest_schema_prefix` variable. This allows to have several semantic schemas created from single source schema for example to test different settings, run automated tests or experiment with model transformations.
+By default destination (`staging` and `views`) schemas will use the same schema prefix as **source schemas** (`event` and `model`). Alternative destination schema prefix can be specified with `destination_dataset_name` variable. This allows to have several semantic schemas created from single source schema for example to test different settings, run automated tests or experiment with model transformations.
 
 Currently only **full refresh** runs are supported when destination schema prefix is different from source schema prefix.
 
 ```
-dbt run --profiles-dir . --vars "{source_schema_prefix: findemo_eks, dest_schema_prefix: findemo_eks_experiments}" --fail-fast --full-refresh
+dbt run --profiles-dir . --vars "{source_dataset_name: findemo_eks, destination_dataset_name: findemo_eks_experiments}" --fail-fast --full-refresh
 ```
 
 ### Running in Production
@@ -111,11 +111,11 @@ dbt deps --profiles-dir .
 ```
 2. update seeds
 ```
-dbt seed --profiles-dir . --vars "{source_schema_prefix: findemo_eks}"
+dbt seed --profiles-dir . --vars "{source_dataset_name: findemo_eks}"
 ```
 3. test if source schema (`event`) was created (or have the package fail on non existing tables)
 ```
-dbt test --profiles-dir . --vars "{source_schema_prefix: findemo_eks}" -s tag:prerequisites
+dbt test --profiles-dir . --vars "{source_dataset_name: findemo_eks}" -s tag:prerequisites
 ```
 will return non 0 exit code if fails
 
@@ -137,5 +137,5 @@ On the successful processing new records are inserted with status = 1.
 Full refresh will take all the existing distinct loads from the `_loads` table.
 [dbt docs](https://docs.getdbt.com/docs/building-a-dbt-project/building-models/configuring-incremental-models#what-if-the-columns-of-my-incremental-model-change)
 ```
-dbt run --full-refresh --profiles-dir . --vars "{source_schema_prefix: findemo_eks}" --fail-fast
+dbt run --full-refresh --profiles-dir . --vars "{source_dataset_name: findemo_eks}" --fail-fast
 ```

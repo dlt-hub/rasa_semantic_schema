@@ -2,7 +2,7 @@
     config(tags=["test_fixture_jm", "full", "incremental", "unit"])
 }}
 
-{%- if var("source_schema_prefix") == "test_fixture_jm" -%}
+{%- if var("source_dataset_name") == "test_fixture_jm" -%}
 
 SELECT * FROM (
 

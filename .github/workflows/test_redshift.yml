@@ -20,8 +20,8 @@ jobs:
 
     strategy:
       matrix:
-        dbt_vars: ["{source_schema_prefix: test_fixture_carbon_bot_session_cases, user_id: metadata__user_id,  dest_schema_prefix: test_fixture_carbon_bot_session_cases_github_ci}",
-                   "{source_schema_prefix: test_fixture_jm, user_id: metadata__user_id, external_session_id: metadata__mitter_id, dest_schema_prefix: test_fixture_jm_github_ci}"]
+        dbt_vars: ["{source_dataset_name: test_fixture_carbon_bot_session_cases, user_id: metadata__user_id,  destination_dataset_name: test_fixture_carbon_bot_session_cases_github_ci}",
+                   "{source_dataset_name: test_fixture_jm, user_id: metadata__user_id, external_session_id: metadata__mitter_id, destination_dataset_name: test_fixture_jm_github_ci}"]
 
     env:
       COMMON_CLI_PARAMS: '--profiles-dir . --profile rasa_semantic_schema_redshift --vars "${{ matrix.dbt_vars }}"'

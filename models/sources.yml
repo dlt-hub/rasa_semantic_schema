@@ -6,26 +6,26 @@ sources:
       database: true
       schema: true
       identifier: true
-    schema: "{{ var('source_schema_prefix') }}_event"
+    schema: "{{ var('source_dataset_name') }}_event"
     tables:
       - name: event
-        schema: "{{ var('source_schema_prefix') }}_event"
+        schema: "{{ var('source_dataset_name') }}_event"
       - name: event_user
-        schema: "{{ var('source_schema_prefix') }}_event"
+        schema: "{{ var('source_dataset_name') }}_event"
       - name: event_bot
-        schema: "{{ var('source_schema_prefix') }}_event"
+        schema: "{{ var('source_dataset_name') }}_event"
       - name: event_slot
-        schema: "{{ var('source_schema_prefix') }}_event"
+        schema: "{{ var('source_dataset_name') }}_event"
       - name: event_action
-        schema: "{{ var('source_schema_prefix') }}_event"
+        schema: "{{ var('source_dataset_name') }}_event"
       - name: event_active_loop
-        schema: "{{ var('source_schema_prefix') }}_event"
+        schema: "{{ var('source_dataset_name') }}_event"
       - name: event_session_started
-        schema: "{{ var('source_schema_prefix') }}_event"
+        schema: "{{ var('source_dataset_name') }}_event"
       - name: _loads
-        schema: "{{ var('source_schema_prefix') }}_event"
+        schema: "{{ var('source_dataset_name') }}_event"
       - name: _version
-        schema: "{{ var('source_schema_prefix') }}_event }}"
+        schema: "{{ var('source_dataset_name') }}_event }}"
         columns:
           - name: version
             tests:
@@ -37,10 +37,10 @@ sources:
       database: true
       schema: true
       identifier: true
-    schema: "{{ var('source_schema_prefix') }}_model"
+    schema: "{{ var('source_dataset_name') }}_model"
     tables:
       - name: model
-        schema: "{{ var('source_schema_prefix') }}_model"
+        schema: "{{ var('source_dataset_name') }}_model"
         columns:
           - name: model_id
             tests:

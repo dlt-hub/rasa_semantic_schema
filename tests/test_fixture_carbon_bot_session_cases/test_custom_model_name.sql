@@ -2,7 +2,7 @@
     config(tags=["test_fixture_carbon_bot_session_cases", "full", "incremental", "unit"])
 }}
 
-{%- if var("source_schema_prefix") == "test_fixture_carbon_bot_session_cases" -%}
+{%- if var("source_dataset_name") == "test_fixture_carbon_bot_session_cases" -%}
 
 select * from (
 

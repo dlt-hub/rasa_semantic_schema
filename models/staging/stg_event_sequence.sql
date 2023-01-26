@@ -31,7 +31,7 @@ sessionify as
         case when
           (
             -- break session when gap > N minutes for backward compatibility
-            {{ dbt_utils.datediff( 'cast(prev_actions.previous_ts as timestamp)', 'cast(prev_actions.timestamp as timestamp)', 'minute') }} > {{ var('compat_old_session_gap_minutes') }}
+            {{ datediff( 'cast(prev_actions.previous_ts as timestamp)', 'cast(prev_actions.timestamp as timestamp)', 'minute') }} > {{ var('compat_old_session_gap_minutes') }}
             or (
             --start from session start event, but if there is a session_started_metadata before it, start from there.
                 ((event='action' and value IN ('action_session_start', 'action_restart')) and not (previous_event = 'slot' and previous_value= 'session_started_metadata'))

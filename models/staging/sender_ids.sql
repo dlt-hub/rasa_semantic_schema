@@ -28,7 +28,7 @@ with sender_user_events as
     -- take pure session bounces where user id was not present
     select distinct  sender_id,
             _load_id,
-            cast(null as {{ dbt_utils.type_string() }}) as user_id
+            cast(null as {{ type_string() }}) as user_id
     from {{ source('events', 'event_action') }} as ss
     where name IN ('action_listen', 'action_session_start')
 ),

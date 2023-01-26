@@ -1,14 +1,7 @@
 name: 'rasa_semantic_schema'
 version: '1.2.0'
 config-version: 2
-require-dbt-version: [">=1.0.0", "<1.1.0"]
-
-
-# provide a profile name to access particular warehouse, following profiles are available
-# - rasa_semantic_schema_redshift to access Redshift warehouse
-# - rasa_semantic_schema_bigquery to access BigQuery via environment variables (keyfile_json)
-# - rasa_semantic_schema_bigquery_service_file to access BigQuery via service account file
-# profile: 'rasa_semantic_schema_redshift'
+require-dbt-version: [">=1.2.0"]
 
 
 vars:

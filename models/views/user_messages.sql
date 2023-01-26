@@ -36,9 +36,9 @@ SELECT
     e.interaction_id as action_interaction_fk,
     -- do not generate reference to interaction nr 0 - it holds everything that happend before user sent first message
     (case when e.interaction_nr <= 1 then
-        cast(null as {{ dbt_utils.type_string() }})
+        cast(null as {{ type_string() }})
     else
-        {{ dbt_utils.concat(['senders.user_id', "'/'", 'e.session_nr',  "'/'"  ,'(e.interaction_nr -1)']) }}
+        {{ concat(['senders.user_id', "'/'", 'e.session_nr',  "'/'"  ,'(e.interaction_nr -1)']) }}
     end
     ) as previous_bot_interaction_fk
 from {{ ref('stg_event_sequence') }} as e

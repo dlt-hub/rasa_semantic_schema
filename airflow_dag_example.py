@@ -25,7 +25,7 @@ schema_prefix = ''
 airflow instance installation.
 Depending on how you prepare your airflow environment, you could add the install and the deps command to the dag"""
 
-cmd = f"""env $(cat .env | grep "^[^#;]" | xargs) PG_PASSWORD={pg_pass} dbt run  --profiles-dir . --vars "{{source_schema_prefix: {schema_prefix}}" --fail-fast
+cmd = f"""env $(cat .env | grep "^[^#;]" | xargs) PG_PASSWORD={pg_pass} dbt run  --profiles-dir . --vars "{{source_dataset_name: {schema_prefix}}" --fail-fast
 """
 
 schema_task = BashOperator(
