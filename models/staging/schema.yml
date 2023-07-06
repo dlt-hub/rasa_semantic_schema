@@ -91,7 +91,7 @@ models:
           - unique
           - not_null
       - name: slot_action_normalised
-        tests:
+        tests: []
           # slots can only be requested in form context
           # test is not passing due to bugs in the bot code and tracker
           # - accepted_values:
