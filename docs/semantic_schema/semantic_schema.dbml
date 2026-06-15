@@ -1,0 +1,372 @@
+// =============================================================================
+// Rasa Semantic Schema — SEMANTIC SCHEMA (reporting)
+// =============================================================================
+// Best-effort reverse engineering of the schema this dbt package builds on top
+// of the raw/source schema (see ../raw_schema/raw_schema.dbml). Derived from the
+// model SQL in models/views and models/staging plus README_SCHEMA.md.
+//
+// Physical layout (share one {schema_prefix}, configurable via dest_schema_prefix):
+//   * {schema_prefix}_staging — intermediate tables (load_ids, sender_ids,
+//                               events, stg_*). Helpers; not modelled here.
+//   * {schema_prefix}_views   — final reporting tables (this file).
+//
+// Two kinds of tables (README_SCHEMA.md):
+//   EVENT tables          — one row per dialogue/scenario event
+//                           (user_messages, bot_actions, slots, actions,
+//                            event_sequence)
+//   STATEFUL ENTITY tables — cumulative state aggregations
+//                           (interactions, sessions, senders/conversations,
+//                            users, models)
+//
+// Join conventions:
+//   *_sk  surrogate key on an event table == its interaction_id; other event
+//         tables join to it (n:n across event tables within one interaction).
+//   *_fk  foreign key carrying an interaction_id pointing at another event
+//         table's *_sk (e.g. previous_*/next_* are offset by one interaction).
+//   plain ids (interaction_id, session_id, user_id, sender_id, model_id) are
+//         n:1 joins to the stateful entity / dimension tables.
+// =============================================================================
+
+Project rasa_semantic_schema {
+  database_type: 'Redshift / BigQuery'
+  Note: '''
+    Reporting (semantic) schema for the Rasa Semantic Schema dbt package.
+    Reverse-engineered from models/views/*.sql, models/staging/*.sql and
+    README_SCHEMA.md. The *_count / *_session_id metric columns are generated
+    from the `count_metrics` var in dbt_project.yml (defaults shown); they
+    change with bot configuration.
+  '''
+}
+
+// =============================================================================
+// EVENT TABLES
+// =============================================================================
+
+// Long stream of every event, enriched with session/interaction numbering.
+// Backs the views.event_sequence table (== stg_event_sequence).
+Table event_sequence {
+  _record_hash          varchar    [pk, note: 'FK to raw event._record_hash']
+  sender_id             varchar
+  user_id               varchar
+  event                 varchar     [note: 'Event type: user / bot / slot / action / active_loop / session_started']
+  value                 varchar     [note: 'Per-type payload: intent name (user), utter_action (bot), slot/action/loop name']
+  model_id              varchar
+  environment           varchar
+  "timestamp"           timestamp
+  interaction_nr        bigint      [note: 'Running count of user turns within the session (0 = pre-first-user-message)']
+  reverse_interaction_nr bigint     [note: 'max(interaction_nr) in session - interaction_nr; 0 marks the last interaction']
+  session_nr            bigint      [note: 'User-level session ordinal (dense rank by start time)']
+  sender_session_nr     bigint      [note: 'Sender-level session ordinal']
+  active_form           varchar     [note: 'Form/loop active at this point in the session']
+  active_form_nr        bigint      [note: 'Ordinal of the active form instance within the session']
+  interaction_id        varchar     [note: 'user_id/session_nr/interaction_nr — FK to interactions']
+  session_id            varchar     [note: 'user_id/session_nr — FK to sessions']
+
+  Note: 'One row per raw event. Granular spine joined to all entity tables.'
+}
+
+// User (human) utterances.
+Table user_messages {
+  user_message_record_hash  varchar  [pk, note: 'FK to raw event_user._record_hash']
+  user_id                   varchar
+  sender_id                 varchar
+  message_id                varchar
+  "timestamp"               timestamp
+  text                      varchar    [note: 'User message text']
+  intent_name               varchar    [note: 'Predicted intent']
+  intent_confidence         double     [note: 'Intent confidence']
+  input_channel             varchar
+  model_id                  varchar
+  environment               varchar
+  session_nr                bigint
+  interaction_nr            bigint
+  interaction_id            varchar    [note: 'Encapsulating interaction (n:1)']
+  user_interaction_sk       varchar    [note: 'Surrogate key (== interaction_id) other event tables join to']
+  bot_interaction_fk        varchar    [note: 'Join to bot_actions in the SAME interaction']
+  slot_interaction_fk       varchar    [note: 'Join to slots in the SAME interaction']
+  action_interaction_fk     varchar    [note: 'Join to actions in the SAME interaction']
+  previous_bot_interaction_fk varchar  [note: 'Join to bot_actions of the PREVIOUS interaction (null for interaction_nr <= 1)']
+
+  Note: 'Dialogue event: contains references to the encapsulating entity and to current/previous bot messages.'
+}
+
+// Bot messages and actions (utterances).
+Table bot_actions {
+  bot_record_hash         varchar    [pk, note: 'FK to raw event_bot._record_hash']
+  user_id                 varchar
+  sender_id               varchar
+  model_id                varchar
+  environment             varchar
+  text                    varchar     [note: 'Bot message text']
+  utter_action            varchar     [note: 'Utter/action template name']
+  "timestamp"             timestamp
+  session_nr              bigint
+  interaction_nr          bigint
+  interaction_id          varchar     [note: 'Encapsulating interaction (n:1)']
+  session_id              varchar
+  bot_interaction_sk      varchar     [note: 'Surrogate key (== interaction_id) other event tables join to']
+  user_interaction_fk     varchar     [note: 'Join to user_messages in the SAME interaction']
+  action_interaction_fk   varchar     [note: 'Join to actions in the SAME interaction']
+  next_user_interaction_fk varchar    [note: 'Join to user_messages of the NEXT interaction (null on the last interaction)']
+
+  Note: 'Dialogue event: contains references to the encapsulating entity and to current/next bot messages.'
+}
+
+// Slot request & fill events (scenario events).
+Table slots {
+  slot_record_hash                   varchar  [pk, note: 'FK to raw event_slot._record_hash']
+  sender_id                          varchar
+  model_id                           varchar
+  environment                        varchar
+  name                               varchar  [note: 'Raw slot name (or requested_slot)']
+  value                              varchar  [note: 'Slot value']
+  slot_name_normalised               varchar  [note: 'Normalised slot name (requested_slot resolved to the actual slot)']
+  slot_action_normalised             varchar  [note: "requested_slot | filled_slot"]
+  "timestamp"                        timestamp
+  session_id                         varchar
+  session_nr                         bigint
+  interaction_id                     varchar
+  interaction_nr                     bigint
+  slots_interaction_sk               varchar  [note: 'Surrogate key (== interaction_id)']
+  next_slot_fill_record_hash         varchar  [note: 'event_sequence._record_hash of the next fill of this slot in the same form instance']
+  fill_event_interaction_id          varchar  [note: 'Interaction where the slot was actually filled']
+  next_slot_fill_attempt_record_hash varchar  [note: 'event_sequence._record_hash of the next fill attempt']
+  fill_attempt_event_interaction_id  varchar  [note: 'Interaction of the next fill attempt']
+
+  Note: 'Scenario event: records slot requests and (attempted) fills. Used for slot funnels.'
+}
+
+// Story / policy actions (scenario events).
+Table actions {
+  action_record_hash          varchar  [pk, note: 'FK to raw event_action._record_hash']
+  action_name                 varchar
+  confidence                  double    [note: 'Policy confidence for the action']
+  model_id                    varchar
+  environment                 varchar
+  "timestamp"                 timestamp
+  sender_id                   varchar
+  session_nr                  bigint
+  interaction_nr              bigint
+  interaction_id              varchar
+  session_id                  varchar
+  story_action_interaction_sk varchar   [note: 'Surrogate key (== interaction_id)']
+
+  Note: 'Scenario event for story-driven setups. Mirror of slots for non-form bots.'
+}
+
+// =============================================================================
+// STATEFUL ENTITY TABLES
+// =============================================================================
+
+// Smallest stateful unit: a human utterance + everything until the next one.
+Table interactions {
+  interaction_id                  varchar    [pk, note: 'user_id/session_nr/interaction_nr']
+  interaction_nr                  bigint
+  reverse_interaction_nr          bigint
+  sender_id                       varchar
+  session_id                      varchar
+  session_nr                      bigint
+  user_id                         varchar
+  interaction_initiation_timestamp timestamp [note: 'First event in the interaction']
+  interaction_start_timestamp     timestamp  [note: 'First user event in the interaction']
+  interaction_end_timestamp       timestamp
+  interaction_active_form         varchar
+  interaction_model_id            varchar    [note: 'FK to models.model_id']
+  environment                     varchar
+  external_session_id             varchar    [note: 'Optional external session id from message/session metadata']
+  story_intent                    varchar    [note: 'Intent opening a story/skill (from story_intents var), else null']
+  intent                          varchar    [note: 'Intent of the user message in this interaction']
+  // --- count metrics (generated from count_metrics var; defaults shown) ---
+  intent_out_of_scope_count       bigint     [note: 'metric: count of out_of_scope intents']
+  intent_nlu_fallback_count       bigint     [note: 'metric: count of nlu_fallback intents']
+  action_default_fallback_count   bigint     [note: 'metric: count of action_default_fallback']
+  action_unlikely_intent_count    bigint     [note: 'metric: count of action_unlikely_intent']
+  intents_frustrated_count        bigint     [note: 'metric: configurable frustration intents']
+  intents_happy_count             bigint     [note: 'metric: configurable satisfaction intents']
+  intents_raise_dispute_count     bigint     [note: 'metric: configurable dispute intents']
+  actions_agent_handoff_count     bigint     [note: 'metric: configurable handoff actions']
+  // --- intra-interaction surrogate keys (== interaction_id) ---
+  interaction_slot_fk             varchar
+  interaction_user_fk             varchar
+  interaction_bot_fk              varchar
+  interaction_story_action_fk     varchar
+  // --- offset references to the previous interaction ---
+  previous_interaction_user_fk    varchar    [note: 'Previous interaction_id (user table)']
+  previous_interaction_bot_fk     varchar    [note: 'Previous interaction_id (bot table)']
+  previous_interaction_action_fk  varchar    [note: 'Previous interaction_id (action table)']
+  previous_interaction_slot_fk    varchar    [note: 'Previous interaction_id (slot table)']
+
+  Note: 'A dialogue exchange (user turn) plus all technical events during it. Smallest unit with an outcome/state.'
+}
+
+// Aggregation of interactions bounded by a session_start / inactivity gap.
+Table sessions {
+  session_id                  varchar    [pk, note: 'user_id/session_nr']
+  sender_id                   varchar
+  session_nr                  bigint
+  user_id                     varchar
+  external_session_id         varchar
+  environment                 varchar
+  first_bot_model             varchar    [note: 'First model id seen in the session — FK to models.model_id']
+  first_story_intent          varchar    [note: 'First story-opening intent in the session']
+  session_initiation_timestamp timestamp [note: 'First event (may precede first human utterance)']
+  session_start_timestamp     timestamp  [note: 'First human utterance']
+  session_end_timestamp       timestamp
+  session_duration_seconds    bigint
+  interactions_count          bigint     [note: 'max interaction_nr in the session']
+  distinct_forms_activated    bigint
+  distinct_story_intent_count bigint
+  is_bounced                  boolean    [note: 'true when interactions_count = 0']
+  bounced_session_id          varchar    [note: 'session_id when bounced, else null']
+  new_returning_session       varchar    [note: "'new' when session_nr = 1 else 'returning'"]
+  // --- count metrics rolled up from interactions (defaults shown) ---
+  intent_out_of_scope_count       bigint
+  intent_nlu_fallback_count       bigint
+  action_default_fallback_count   bigint
+  action_unlikely_intent_count    bigint
+  intents_frustrated_count        bigint
+  intents_happy_count             bigint
+  intents_raise_dispute_count     bigint
+  actions_agent_handoff_count     bigint
+  // --- per-metric session id (session_id when metric_count > 0 else null) ---
+  intent_out_of_scope_session_id      varchar
+  intent_nlu_fallback_session_id      varchar
+  action_default_fallback_session_id  varchar
+  action_unlikely_intent_session_id   varchar
+  intents_frustrated_session_id       varchar
+  intents_happy_session_id            varchar
+  intents_raise_dispute_session_id    varchar
+  actions_agent_handoff_session_id    varchar
+
+  Note: 'Higher aggregation of interactions, delimited by a session-start event or an inactivity gap.'
+}
+
+// "Conversations" — aggregation keyed by the raw Rasa sender_id.
+Table senders {
+  sender_id                              varchar    [pk]
+  user_id                                varchar
+  sessions_count                         bigint
+  sender_conversation_initiation_timestamp timestamp [note: 'May be initiated without human interaction']
+  sender_conversation_start_timestamp    timestamp  [note: 'First human interaction']
+  sender_conversation_end_timestamp      timestamp
+  sender_conversation_duration_seconds   bigint
+
+  Note: 'Conversation entity: like sessions but aggregated by the Rasa sender id.'
+}
+
+// Custom user entity, keyed by the configurable user_id.
+Table users {
+  user_id            varchar    [pk]
+  first_seen_timestamp timestamp
+  last_seen_timestamp  timestamp
+  sessions_count       bigint
+  first_session_id     varchar   [note: 'FK to sessions.session_id']
+  last_session_id      varchar   [note: 'FK to sessions.session_id']
+  first_sender_id      varchar   [note: 'FK to senders.sender_id']
+  last_sender_id       varchar   [note: 'FK to senders.sender_id']
+
+  Note: 'Custom user: like conversations but keyed by a user id you supply (defaults to sender_id).'
+}
+
+// Bot model dimension.
+Table models {
+  model_id          varchar  [pk]
+  name              varchar
+  sdk_version       varchar
+  "timestamp"       timestamp
+  model_name_custom varchar  [note: 'name + "_" + sdk_version (override via generate_readable_model_name macro)']
+
+  Note: 'Bot model dimension (views.models), sourced from {schema_prefix}_model.model.'
+}
+
+// =============================================================================
+// References
+// =============================================================================
+
+// --- event_sequence -> entities ---
+Ref: event_sequence.interaction_id > interactions.interaction_id
+Ref: event_sequence.session_id     > sessions.session_id
+Ref: event_sequence.user_id        > users.user_id
+Ref: event_sequence.sender_id      > senders.sender_id
+Ref: event_sequence.model_id       > models.model_id
+
+// --- user_messages ---
+Ref: user_messages.interaction_id            > interactions.interaction_id
+Ref: user_messages.user_id                   > users.user_id
+Ref: user_messages.sender_id                 > senders.sender_id
+Ref: user_messages.bot_interaction_fk        > bot_actions.bot_interaction_sk
+Ref: user_messages.slot_interaction_fk       > slots.slots_interaction_sk
+Ref: user_messages.action_interaction_fk     > actions.story_action_interaction_sk
+Ref: user_messages.previous_bot_interaction_fk > interactions.interaction_id
+
+// --- bot_actions ---
+Ref: bot_actions.interaction_id          > interactions.interaction_id
+Ref: bot_actions.session_id              > sessions.session_id
+Ref: bot_actions.user_id                 > users.user_id
+Ref: bot_actions.sender_id               > senders.sender_id
+Ref: bot_actions.model_id                > models.model_id
+Ref: bot_actions.user_interaction_fk     > user_messages.user_interaction_sk
+Ref: bot_actions.action_interaction_fk   > actions.story_action_interaction_sk
+Ref: bot_actions.next_user_interaction_fk > interactions.interaction_id
+
+// --- slots ---
+Ref: slots.interaction_id                    > interactions.interaction_id
+Ref: slots.session_id                        > sessions.session_id
+Ref: slots.sender_id                         > senders.sender_id
+Ref: slots.model_id                          > models.model_id
+Ref: slots.fill_event_interaction_id         > interactions.interaction_id
+Ref: slots.fill_attempt_event_interaction_id > interactions.interaction_id
+Ref: slots.next_slot_fill_record_hash        > event_sequence._record_hash
+Ref: slots.next_slot_fill_attempt_record_hash > event_sequence._record_hash
+
+// --- actions ---
+Ref: actions.interaction_id > interactions.interaction_id
+Ref: actions.session_id     > sessions.session_id
+Ref: actions.sender_id      > senders.sender_id
+Ref: actions.model_id       > models.model_id
+
+// --- interactions -> entities ---
+Ref: interactions.session_id           > sessions.session_id
+Ref: interactions.user_id              > users.user_id
+Ref: interactions.sender_id            > senders.sender_id
+Ref: interactions.interaction_model_id > models.model_id
+Ref: interactions.previous_interaction_user_fk   > interactions.interaction_id
+Ref: interactions.previous_interaction_bot_fk    > interactions.interaction_id
+Ref: interactions.previous_interaction_action_fk > interactions.interaction_id
+Ref: interactions.previous_interaction_slot_fk   > interactions.interaction_id
+
+// --- sessions -> entities ---
+Ref: sessions.user_id         > users.user_id
+Ref: sessions.sender_id       > senders.sender_id
+Ref: sessions.first_bot_model > models.model_id
+
+// --- senders -> users ---
+Ref: senders.user_id > users.user_id
+
+// --- users -> sessions / senders ---
+Ref: users.first_session_id > sessions.session_id
+Ref: users.last_session_id  > sessions.session_id
+Ref: users.first_sender_id  > senders.sender_id
+Ref: users.last_sender_id   > senders.sender_id
+
+// =============================================================================
+// Table groups
+// =============================================================================
+
+// Per-event fact tables
+TableGroup event_tables {
+  event_sequence
+  user_messages
+  bot_actions
+  slots
+  actions
+}
+
+// Cumulative state / dimension tables
+TableGroup stateful_entities {
+  interactions
+  sessions
+  senders
+  users
+  models
+}
