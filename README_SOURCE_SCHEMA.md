@@ -48,6 +48,8 @@ Represents bot model with tables that correspond to
 
 with the same rules for table linking as above
 
+![raw schema](docs/raw_schema/raw_schema.dbml.png)
+
 # Unpacking Engine
 
 Unpacking engine transforms nested JSON document into a relational form. Each document is processed recursively
